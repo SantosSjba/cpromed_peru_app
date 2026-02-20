@@ -13,11 +13,18 @@
         @click.prevent="toggleDropdown()"
         type="button"
     >
-        <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
-            <img src="/images/user/owner.png" alt="User" />
+        @php
+            $name = Auth::user()?->name ?? 'Usuario';
+            $words = array_filter(explode(' ', trim($name)));
+            $initials = count($words) >= 2
+                ? strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[array_key_last($words)], 0, 1))
+                : strtoupper(mb_substr($name, 0, 2) ?: mb_substr($name, 0, 1));
+        @endphp
+        <span class="mr-3 flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-500 text-sm font-semibold text-white dark:bg-brand-600">
+            {{ $initials }}
         </span>
 
-       <span class="block mr-1 font-medium text-theme-sm">{{ Auth::user()?->name ?? 'Usuario' }}</span>
+       <span class="block mr-1 font-medium text-theme-sm">{{ $name }}</span>
 
         <!-- Chevron Icon -->
         <svg

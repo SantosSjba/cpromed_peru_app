@@ -8,113 +8,25 @@ class MenuHelper
     {
         return [
             [
-                'icon' => 'dashboard',
-                'name' => 'Dashboard',
-                'path' => '/',
-            ],
-            [
-                'icon' => 'user-profile',
-                'name' => 'Pacientes',
-                'subItems' => [
-                    ['name' => 'Todos los Pacientes', 'path' => '/pacientes', 'pro' => false],
-                    ['name' => 'Agregar Paciente', 'path' => '/pacientes/crear', 'pro' => false],
-                    ['name' => 'Registro de Pacientes', 'path' => '/pacientes/registro', 'pro' => false],
-                ],
-            ],
-            [
-                'icon' => 'calendar',
-                'name' => 'Citas',
-                'subItems' => [
-                    ['name' => 'Calendario de citas', 'path' => '/calendar', 'pro' => false],
-                    ['name' => 'Reservar Cita', 'path' => '/citas/crear', 'pro' => false],
-                ],
-            ],
-            [
-                'icon' => 'task',
-                'name' => 'Médicos',
-                'subItems' => [
-                    ['name' => 'Todos los Médicos', 'path' => '/medicos', 'pro' => false],
-                    ['name' => 'Agregar Médico', 'path' => '/medicos/crear', 'pro' => false],
-                    ['name' => 'Gestión de Turnos', 'path' => '/medicos/turnos', 'pro' => false],
-                ],
-            ],
-            [
-                'icon' => 'pages',
-                'name' => 'Registros',
-                'subItems' => [
-                    ['name' => 'Registro de nacimiento', 'path' => '/registros/nacimiento', 'pro' => false],
-                    ['name' => 'Registro de defunción', 'path' => '/registros/defuncion', 'pro' => false],
-                ],
-            ],
-            [
-                'icon' => 'forms',
-                'name' => 'Farmacia',
-                'subItems' => [
-                    ['name' => 'Lista de Medicamentos', 'path' => '/farmacia', 'pro' => false],
-                    ['name' => 'Agregar Medicamento', 'path' => '/farmacia/crear', 'pro' => false],
-                ],
-            ],
-            [
-                'icon' => 'tables',
-                'name' => 'Inventario',
-                'subItems' => [
-                    ['name' => 'Stock de Artículos', 'path' => '/inventario', 'pro' => false],
-                    ['name' => 'Artículos Emitidos', 'path' => '/inventario/emitidos', 'pro' => false],
-                ],
-            ],
-            [
-                'icon' => 'user-profile',
-                'name' => 'Mi Perfil',
-                'path' => '/profile',
+                'icon' => 'ecommerce',
+                'name' => 'Notas de venta',
+                'path' => '/notas-venta',
             ],
         ];
     }
 
     public static function getOthersItems()
     {
-        return [
-            [
-                'icon' => 'charts',
-                'name' => 'Charts',
-                'subItems' => [
-                    ['name' => 'Line Chart', 'path' => '/line-chart', 'pro' => false],
-                    ['name' => 'Bar Chart', 'path' => '/bar-chart', 'pro' => false]
-                ],
-            ],
-            [
-                'icon' => 'ui-elements',
-                'name' => 'UI Elements',
-                'subItems' => [
-                    ['name' => 'Alerts', 'path' => '/alerts', 'pro' => false],
-                    ['name' => 'Avatar', 'path' => '/avatars', 'pro' => false],
-                    ['name' => 'Badge', 'path' => '/badge', 'pro' => false],
-                    ['name' => 'Buttons', 'path' => '/buttons', 'pro' => false],
-                    ['name' => 'Images', 'path' => '/image', 'pro' => false],
-                    ['name' => 'Videos', 'path' => '/videos', 'pro' => false],
-                ],
-            ],
-            [
-                'icon' => 'authentication',
-                'name' => 'Authentication',
-                'subItems' => [
-                    ['name' => 'Sign In', 'path' => '/signin', 'pro' => false],
-                    ['name' => 'Sign Up', 'path' => '/signup', 'pro' => false],
-                ],
-            ],
-        ];
+        return [];
     }
 
     public static function getMenuGroups()
     {
         return [
             [
-                'title' => 'Menu',
-                'items' => self::getMainNavItems()
+                'title' => 'Menú',
+                'items' => self::getMainNavItems(),
             ],
-            [
-                'title' => 'Others',
-                'items' => self::getOthersItems()
-            ]
         ];
     }
 

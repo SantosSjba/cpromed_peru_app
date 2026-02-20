@@ -3,21 +3,25 @@
 }}">
     <div class="mb-6 rounded-2xl border border-gray-200 p-5 lg:p-6 dark:border-gray-800">
         <div class="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            @php
+                $user = Auth::user();
+                $name = $user?->name ?? 'Usuario';
+                $words = array_filter(explode(' ', trim($name)));
+                $initials = count($words) >= 2
+                    ? strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[array_key_last($words)], 0, 1))
+                    : strtoupper(mb_substr($name, 0, 2) ?: mb_substr($name, 0, 1));
+            @endphp
             <div class="flex w-full flex-col items-center gap-6 xl:flex-row">
-                <div class="h-20 w-20 overflow-hidden rounded-full border border-gray-200 dark:border-gray-800">
-                    <img src="./images/user/owner.jpg" alt="user" />
+                <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-brand-500 text-2xl font-semibold text-white dark:border-gray-800 dark:bg-brand-600">
+                    {{ $initials }}
                 </div>
                 <div class="order-3 xl:order-2">
                     <h4 class="mb-2 text-center text-lg font-semibold text-gray-800 xl:text-left dark:text-white/90">
-                        Musharof Chowdhury
+                        {{ $name }}
                     </h4>
                     <div class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Team Manager
-                        </p>
-                        <div class="hidden h-3.5 w-px bg-gray-300 xl:block dark:bg-gray-700"></div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Arizona, United States.
+                            {{ $user?->email ?? '' }}
                         </p>
                     </div>
                 </div>

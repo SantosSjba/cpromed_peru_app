@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\NotaVentaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', function () {
         return view('pages.profile', ['title' => 'Perfil']);
     })->name('profile');
+
+    // Notas de venta (migrado desde admintopico)
+    Route::get('notas-venta/{notaVenta}/pdf', [NotaVentaController::class, 'pdf'])->name('notas-venta.pdf');
+    Route::resource('notas-venta', NotaVentaController::class)->only(['index', 'create', 'store', 'show']);
 
     Route::get('/form-elements', function () {
         return view('pages.form.form-elements', ['title' => 'Form Elements']);
