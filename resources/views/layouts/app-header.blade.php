@@ -49,9 +49,8 @@
             </button>
 
             <!-- Logo (mobile only) -->
-            <a href="/" class="xl:hidden">
-                <img class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" />
-                <img class="hidden dark:block" src="/images/logo/logo-dark.svg" alt="Logo" />
+            <a href="/" class="xl:hidden flex items-center">
+                <img src="/logo_cpromed.jpg" alt="CPROMED PERU" class="h-9 w-auto max-w-[140px] object-contain" />
             </a>
 
             <!-- Application Menu Toggle (mobile only) -->

@@ -187,13 +187,13 @@ class NotaVentaController extends Controller
     private function getLogoBase64(): string
     {
         $paths = [
-            public_path('images/logo/logo.png'),
-            public_path('images/LogoLiz.png'),
+            ['path' => public_path('logo_cpromed.jpg'), 'mime' => 'image/jpeg'],
+            ['path' => public_path('images/logo/logo.png'), 'mime' => 'image/png'],
         ];
-        foreach ($paths as $p) {
-            if (file_exists($p)) {
-                $data = base64_encode(file_get_contents($p));
-                return 'data:image/png;base64,' . $data;
+        foreach ($paths as $item) {
+            if (file_exists($item['path'])) {
+                $data = base64_encode(file_get_contents($item['path']));
+                return 'data:' . $item['mime'] . ';base64,' . $data;
             }
         }
         return '';

@@ -27,7 +27,7 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Razón social</label>
-                        <input type="text" name="razon_social" value="{{ old('razon_social', 'TOPICO LOS ANGELES') }}" class="input-field" />
+                        <input type="text" name="razon_social" value="{{ old('razon_social', 'CPROMED PERU') }}" class="input-field" />
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Dirección</label>
