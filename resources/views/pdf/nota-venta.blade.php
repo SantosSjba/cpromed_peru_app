@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <title>Nota de Venta</title>
     <style>
+        * { box-sizing: border-box; }
         body {
             font-family: DejaVu Sans, sans-serif;
-            font-size: 10pt;
+            font-size: 9pt;
             color: #000;
             margin: 0;
-            padding: 6mm 8mm;
-            line-height: 1.3;
+            padding: 6mm 3mm;
+            line-height: 1.5;
         }
         .header {
             margin-bottom: 8px;
@@ -21,61 +22,90 @@
             text-align: right;
         }
         .company-name {
-            font-size: 11pt;
+            font-size: 9pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 2px;
-            letter-spacing: 0.3px;
+            margin-bottom: 1px;
+            letter-spacing: 0.2px;
         }
         .company-details {
-            font-size: 9pt;
-            margin-bottom: 1px;
+            font-size: 7pt;
+            margin-bottom: 0;
             color: #000;
         }
         .doc-title {
-            font-size: 14pt;
+            font-size: 11pt;
             font-weight: bold;
             text-align: center;
             text-transform: uppercase;
-            margin: 12px 0 10px 0;
-            letter-spacing: 0.5px;
+            margin: 10 0 20px 0;
+            padding: 0;
+            letter-spacing: 0.3px;
         }
         .sale-info {
-            margin-bottom: 10px;
-            font-size: 9pt;
+            width: 100%;
+            margin: 0 0 10px 0;
+            padding: 0;
+            font-size: 7pt;
         }
-        .sale-info-row {
-            margin-bottom: 6px;
+        table.sale-info-table {
+            width: 100% !important;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin: 0;
+            padding: 0;
+        }
+        table.sale-info-table td {
+            vertical-align: top;
+            padding: 2px 0 4px 0;
+            width: 25%;
+            margin: 0;
         }
         .sale-info-label {
             font-weight: bold;
-            margin-bottom: 1px;
+            margin: 0;
         }
         .sale-info-value {
-            padding-left: 18px;
-            margin-bottom: 4px;
+            padding-left: 25px;
+            margin: 0;
         }
         .section-title {
-            font-size: 10pt;
+            font-size: 8pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin: 10px 0 6px 0;
-            letter-spacing: 0.3px;
+            margin: 0 0 6px 0;
+            padding: 0;
+            letter-spacing: 0.2px;
         }
-        .client-info div {
-            margin-bottom: 2px;
-            font-size: 9pt;
+        .client-info {
+            width: 100%;
+            margin: 0 0 10px 0;
+            padding: 0;
+        }
+        .client-info table {
+            width: 100% !important;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 7pt;
+            margin: 0;
+            padding: 0;
+        }
+        .client-info td {
+            vertical-align: top;
+            padding: 2px 0 4px 0;
+            width: 33.33%;
+            margin: 0;
         }
         table.items {
             width: 100%;
             border-collapse: collapse;
-            margin: 8px 0;
-            font-size: 9pt;
+            margin: 0 0 10px 0;
+            font-size: 7pt;
         }
         table.items th,
         table.items td {
             border: 1px solid #333;
-            padding: 4px 6px;
+            padding: 3px 4px;
             text-align: left;
         }
         table.items th {
@@ -93,16 +123,16 @@
             word-wrap: break-word;
         }
         .totals-wrap {
-            margin-top: 10px;
+            margin: 0 0 10px 0;
             text-align: right;
         }
         table.totals {
             margin-left: auto;
-            font-size: 9pt;
+            font-size: 7pt;
             border-collapse: collapse;
         }
         table.totals td {
-            padding: 3px 0 3px 20px;
+            padding: 2px 0 2px 14px;
         }
         table.totals td:first-child {
             padding-left: 0;
@@ -114,20 +144,21 @@
         }
         table.totals tr.grand-total td {
             font-weight: bold;
-            font-size: 11pt;
-            padding-top: 8px;
+            font-size: 9pt;
+            padding-top: 6px;
             border-top: 2px solid #333;
         }
         .footer-motto {
-            margin-top: 16px;
+            margin: 12px 0 0 0;
+            padding: 0;
             text-align: center;
-            font-size: 8pt;
+            font-size: 6pt;
             color: #333;
-            max-width: 100%;
         }
         .notes-section {
-            margin-top: 8px;
-            font-size: 8pt;
+            margin: 0 0 8px 0;
+            padding: 0;
+            font-size: 7pt;
             color: #444;
         }
     </style>
@@ -138,7 +169,7 @@
             <tr>
                 @if($logoBase64)
                     <td width="100" valign="top" style="padding-right: 10px;">
-                        <img src="{{ $logoBase64 }}" alt="Logo" style="max-height: 52px;" />
+                        <img src="{{ $logoBase64 }}" alt="Logo" style="max-height: 42px;" />
                     </td>
                 @endif
                 <td valign="top" width="*" align="right">
@@ -160,38 +191,57 @@
     <div class="doc-title">Nota de Venta</div>
 
     <div class="sale-info">
-        <div class="sale-info-row">
-            <div class="sale-info-label">N°:</div>
-            <div class="sale-info-value">{{ $noteNumber }}</div>
-        </div>
-        <div class="sale-info-row">
-            <div class="sale-info-label">Fecha de Emisión:</div>
-            <div class="sale-info-value">{{ $date }}</div>
-        </div>
-        <div class="sale-info-row">
-            <div class="sale-info-label">Fecha de Vencimiento:</div>
-            <div class="sale-info-value">{{ $dueDate }}</div>
-        </div>
-        <div class="sale-info-row">
-            <div class="sale-info-label">Moneda:</div>
-            <div class="sale-info-value">{{ $currency }}</div>
-        </div>
+        <table class="sale-info-table" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+            <colgroup>
+                <col style="width: 25%;" />
+                <col style="width: 25%;" />
+                <col style="width: 25%;" />
+                <col style="width: 25%;" />
+            </colgroup>
+            <tr>
+                <td>
+                    <div class="sale-info-label">N°:</div>
+                    <div class="sale-info-value">{{ $noteNumber }}</div>
+                </td>
+                <td>
+                    <div class="sale-info-label">Fecha de Emisión:</div>
+                    <div class="sale-info-value">{{ $date }}</div>
+                </td>
+                <td>
+                    <div class="sale-info-label">Fecha de Vencimiento:</div>
+                    <div class="sale-info-value">{{ $dueDate }}</div>
+                </td>
+                <td>
+                    <div class="sale-info-label">Moneda:</div>
+                    <div class="sale-info-value">{{ $currency }}</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <div class="section-title">Cliente</div>
     <div class="client-info">
-        <div class="sale-info-row">
-            <div class="sale-info-label">Nombre:</div>
-            <div class="sale-info-value">{{ $clientName }}</div>
-        </div>
-        <div class="sale-info-row">
-            <div class="sale-info-label">DNI/RUC:</div>
-            <div class="sale-info-value">{{ $clientRuc }}</div>
-        </div>
-        <div class="sale-info-row">
-            <div class="sale-info-label">Dirección:</div>
-            <div class="sale-info-value">{{ $clientAddress }}</div>
-        </div>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+            <colgroup>
+                <col style="width: 33.33%;" />
+                <col style="width: 33.33%;" />
+                <col style="width: 33.34%;" />
+            </colgroup>
+            <tr>
+                <td>
+                    <div class="sale-info-label">Nombre:</div>
+                    <div class="sale-info-value">{{ $clientName }}</div>
+                </td>
+                <td>
+                    <div class="sale-info-label">DNI/RUC:</div>
+                    <div class="sale-info-value">{{ $clientRuc }}</div>
+                </td>
+                <td>
+                    <div class="sale-info-label">Dirección:</div>
+                    <div class="sale-info-value">{{ $clientAddress }}</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <table class="items">
