@@ -1,7 +1,11 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    RewriteCond %{REQUEST_FILENAME} !-f
+    # Evitar que Apache interprete rutas como archivos/carpetas (común en cPanel)
+    Options -MultiViews
+
+    # Enviar todas las peticiones que no sean archivo/carpeta real a Laravel
     RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>

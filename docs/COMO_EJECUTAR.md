@@ -105,3 +105,21 @@ composer run dev:win
 (En Windows usa `dev:win`; en Linux/Mac puedes usar `composer run dev`.)
 
 Abre **http://localhost:8000**. Si no hay sesión, te redirigirá a **Iniciar sesión**; puedes **Registrarse** y luego entrar al dashboard.
+
+---
+
+## Despliegue en cPanel (PDF y rutas)
+
+### Document root
+
+En cPanel, el **document root** del dominio o subdominio debe apuntar a la carpeta **`public`** del proyecto (no a la raíz del proyecto). Ejemplo: si la app está en `~/cpromedperu`, el document root debe ser `~/cpromedperu/public`.
+
+### Si el PDF da 404
+
+La ruta del PDF usa la URL **`/notas-venta/pdf/{id}`** (por ejemplo `https://tudominio.com/notas-venta/pdf/2`) para mejorar compatibilidad con Apache/cPanel. Los enlaces de la app ya generan esta URL.
+
+Si sigue saliendo 404:
+
+1. Comprueba que en cPanel el document root sea la carpeta **public**.
+2. Asegúrate de que en **public** exista el archivo **.htaccess** con las reglas de reescritura (RewriteRule hacia `index.php`).
+3. Si el servidor no permite `Options -MultiViews` en .htaccess y da error 500, elimina esa línea del **public/.htaccess**.

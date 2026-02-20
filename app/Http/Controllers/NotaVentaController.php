@@ -120,6 +120,15 @@ class NotaVentaController extends Controller
         ]);
     }
 
+    /**
+     * PDF por ID (ruta /notas-venta/pdf/{id}) — mejor compatibilidad en cPanel.
+     */
+    public function pdfById(int $id)
+    {
+        $notaVenta = NotaVenta::findOrFail($id);
+        return $this->pdf($notaVenta);
+    }
+
     public function pdf(NotaVenta $notaVenta)
     {
         if ($notaVenta->user_id !== Auth::id()) {

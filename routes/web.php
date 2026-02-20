@@ -35,7 +35,9 @@ Route::middleware('auth')->group(function () {
     })->name('profile');
 
     // Notas de venta (migrado desde admintopico)
-    Route::get('notas-venta/{notaVenta}/pdf', [NotaVentaController::class, 'pdf'])->name('notas-venta.pdf');
+    // Ruta alternativa por ID: mejor compatibilidad con cPanel/hosting compartido
+    Route::get('notas-venta/pdf/{id}', [NotaVentaController::class, 'pdfById'])->name('notas-venta.pdf');
+    Route::get('notas-venta/{notaVenta}/pdf', [NotaVentaController::class, 'pdf'])->name('notas-venta.pdf.slug');
     Route::resource('notas-venta', NotaVentaController::class)->only(['index', 'create', 'store', 'show']);
 
     Route::get('/form-elements', function () {
