@@ -16,6 +16,13 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
+// Prueba de enrutado en cPanel: si ves "OK" aquí, Laravel y mod_rewrite funcionan (borrar en producción)
+Route::get('test-pdf-route', function () {
+    return response('OK - Laravel enruta correctamente. Puedes borrar esta ruta después.', 200, [
+        'Content-Type' => 'text/plain; charset=UTF-8',
+    ]);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Rutas de la aplicación (requieren autenticación)

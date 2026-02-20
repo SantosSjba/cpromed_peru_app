@@ -130,3 +130,9 @@ Si aun así sale 404:
    php artisan cache:clear
    ```
    Luego prueba de nuevo **Descargar PDF** o el enlace que abre `/descargar-nota-pdf?id=2`.
+
+5. **Comprobar que Laravel recibe la ruta:** Abre en el navegador:
+   `https://tudominio.com/test-pdf-route`
+   Si ves el texto "OK - Laravel enruta correctamente...", el servidor y mod_rewrite están bien. Si da 404, el document root o el .htaccess no están correctos.
+
+6. **No hace falta activar extensiones PHP para el PDF.** DomPDF usa extensiones estándar (dom, gd, mbstring, etc.). La extensión "pdf" de la lista de PHP en cPanel no es necesaria para esta aplicación.
