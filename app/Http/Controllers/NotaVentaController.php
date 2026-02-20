@@ -100,7 +100,7 @@ class NotaVentaController extends Controller
         ]);
 
         if ($request->has('generar_pdf') && $request->boolean('generar_pdf')) {
-            return redirect()->route('notas-venta.pdf', $nota)
+            return redirect()->route('notas-venta.pdf', ['id' => $nota->id])
                 ->with('success', 'Nota de venta guardada. Generando PDF.');
         }
 
@@ -121,7 +121,17 @@ class NotaVentaController extends Controller
     }
 
     /**
-     * PDF por ID (ruta /notas-venta/pdf/{id}) — mejor compatibilidad en cPanel.
+     * PDF por query string (?id=2) — usa cuando en cPanel la ruta con segmentos da 404.
+     */
+    public function pdfByQuery(Request $request)
+    {
+        $id = $request->integer('id');
+        $notaVenta = NotaVenta::findOrFail($id);
+        return $this->pdf($notaVenta);
+    }
+
+    /**
+     * PDF por ID en la ruta (notas-venta/pdf/{id}).
      */
     public function pdfById(int $id)
     {

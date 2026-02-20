@@ -4,7 +4,7 @@
     <x-common.page-breadcrumb :pageTitle="$title" />
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <div class="mb-4 flex flex-wrap gap-3">
-            <a href="{{ route('notas-venta.pdf', $nota) }}" target="_blank"
+            <a href="{{ route('notas-venta.pdf', ['id' => $nota->id]) }}" target="_blank"
                 class="inline-flex items-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">
                 Descargar PDF
             </a>

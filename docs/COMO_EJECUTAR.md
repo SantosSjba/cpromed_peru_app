@@ -116,10 +116,17 @@ En cPanel, el **document root** del dominio o subdominio debe apuntar a la carpe
 
 ### Si el PDF da 404
 
-La ruta del PDF usa la URL **`/notas-venta/pdf/{id}`** (por ejemplo `https://tudominio.com/notas-venta/pdf/2`) para mejorar compatibilidad con Apache/cPanel. Los enlaces de la app ya generan esta URL.
+La descarga del PDF usa la URL **`/descargar-nota-pdf?id=2`** (un solo segmento + query string) para que funcione aunque Apache no reescriba bien rutas con varios segmentos. Los botones "PDF" de la app ya abren esta URL.
 
-Si sigue saliendo 404:
+Si aun así sale 404:
 
-1. Comprueba que en cPanel el document root sea la carpeta **public**.
-2. Asegúrate de que en **public** exista el archivo **.htaccess** con las reglas de reescritura (RewriteRule hacia `index.php`).
-3. Si el servidor no permite `Options -MultiViews` en .htaccess y da error 500, elimina esa línea del **public/.htaccess**.
+1. **Document root:** En cPanel → Dominios / Subdominios, el directorio del sitio debe ser la carpeta **`public`** del proyecto (no la raíz del proyecto).
+2. **mod_rewrite (Apache):** En cPanel busca **"Apache Modules"** o **"Select PHP Version"** → **"Extensions"** / **"Apache"** y asegúrate de que **mod_rewrite** esté activado. Sin esto, Laravel no puede enrutar y casi todo dará 404.
+3. **.htaccess:** Dentro de **public** debe existir el **.htaccess** con las reglas que envían las peticiones a `index.php`. Si al subir ves error 500, quita la línea `Options -MultiViews` del .htaccess.
+4. **Caché de rutas:** En el servidor (SSH o terminal de cPanel) ejecuta:
+   ```bash
+   php artisan route:clear
+   php artisan config:clear
+   php artisan cache:clear
+   ```
+   Luego prueba de nuevo **Descargar PDF** o el enlace que abre `/descargar-nota-pdf?id=2`.

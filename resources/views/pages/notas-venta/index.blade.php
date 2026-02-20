@@ -39,7 +39,7 @@
                             <td class="px-4 py-3 text-right font-medium">S/ {{ number_format($nota->total, 2) }}</td>
                             <td class="px-4 py-3 text-right">
                                 <a href="{{ route('notas-venta.show', $nota) }}" class="text-brand-500 hover:underline mr-2">Ver</a>
-                                <a href="{{ route('notas-venta.pdf', $nota) }}" class="text-brand-500 hover:underline" target="_blank">PDF</a>
+                                <a href="{{ route('notas-venta.pdf', ['id' => $nota->id]) }}" class="text-brand-500 hover:underline" target="_blank">PDF</a>
                             </td>
                         </tr>
                     @empty
