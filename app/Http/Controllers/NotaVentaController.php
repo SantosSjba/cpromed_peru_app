@@ -121,6 +121,18 @@ class NotaVentaController extends Controller
         ]);
     }
 
+    public function destroy(NotaVenta $notaVenta): RedirectResponse
+    {
+        if ($notaVenta->user_id !== Auth::id()) {
+            abort(404);
+        }
+
+        $notaVenta->delete();
+
+        return redirect()->route('notas-venta.index')
+            ->with('success', 'Nota de venta eliminada correctamente.');
+    }
+
     /**
      * PDF por query string (?id=2). Ruta fuera del middleware auth para evitar 404 en cPanel.
      * La autenticación y validación se hacen aquí.

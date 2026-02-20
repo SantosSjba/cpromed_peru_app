@@ -8,6 +8,11 @@ class MenuHelper
     {
         return [
             [
+                'icon' => 'dashboard',
+                'name' => 'Dashboard',
+                'path' => '/dashboard',
+            ],
+            [
                 'icon' => 'ecommerce',
                 'name' => 'Notas de venta',
                 'path' => '/notas-venta',

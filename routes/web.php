@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotaVentaController;
 
 /*
@@ -46,9 +47,8 @@ Route::get('descargar-nota-pdf', [NotaVentaController::class, 'pdfByQuery'])->na
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return view('pages.dashboard.ecommerce', ['title' => 'Dashboard']);
-    })->name('dashboard');
+    Route::get('/', fn () => redirect()->route('dashboard'));
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/calendar', function () {
         return view('pages.calender', ['title' => 'Calendario']);
@@ -61,7 +61,7 @@ Route::middleware('auth')->group(function () {
     // Notas de venta (migrado desde admintopico)
     Route::get('notas-venta/pdf/{id}', [NotaVentaController::class, 'pdfById'])->name('notas-venta.pdf.id');
     Route::get('notas-venta/{notaVenta}/pdf', [NotaVentaController::class, 'pdf'])->name('notas-venta.pdf.slug');
-    Route::resource('notas-venta', NotaVentaController::class)->only(['index', 'create', 'store', 'show'])->parameters(['notas-venta' => 'notaVenta']);
+    Route::resource('notas-venta', NotaVentaController::class)->only(['index', 'create', 'store', 'show', 'destroy'])->parameters(['notas-venta' => 'notaVenta']);
 
     Route::get('/form-elements', function () {
         return view('pages.form.form-elements', ['title' => 'Form Elements']);

@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'newsapi' => [
+        'key' => env('NEWS_API_KEY'),
+    ],
+
+    'gnews' => [
+        'token' => env('GNEWS_API_TOKEN'),
+    ],
+
 ];

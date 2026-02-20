@@ -12,6 +12,13 @@
             <a href="{{ route('notas-venta.index') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300">
                 Volver al listado
             </a>
+            <form action="{{ route('notas-venta.destroy', $nota) }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar esta nota de venta?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="inline-flex items-center rounded-lg border border-red-300 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                    Eliminar
+                </button>
+            </form>
         </div>
 
         <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
