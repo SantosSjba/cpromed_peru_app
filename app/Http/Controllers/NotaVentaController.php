@@ -145,10 +145,17 @@ class NotaVentaController extends Controller
         }
 
         if ($notaVenta->user_id !== Auth::id()) {
-            abort(404);
+            return redirect()->route('notas-venta.index')
+                ->with('error', 'No tienes permiso para descargar esa nota de venta.');
         }
 
-        return $this->pdf($notaVenta);
+        try {
+            return $this->pdf($notaVenta);
+        } catch (\Throwable $e) {
+            report($e);
+            return redirect()->route('notas-venta.index')
+                ->with('error', 'No se pudo generar el PDF. Vuelve a intentarlo.');
+        }
     }
 
     /**
