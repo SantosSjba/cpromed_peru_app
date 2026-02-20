@@ -42,6 +42,12 @@ Route::get('test-pdf-download', function () {
 // PDF sin middleware auth: la autenticación se comprueba en el controlador (evita 404 en algunos cPanel)
 Route::get('descargar-nota-pdf', [NotaVentaController::class, 'pdfByQuery'])->name('notas-venta.pdf');
 
+// Ver nota por query string (misma idea que el PDF: evita problemas de sesión en cPanel con URLs /notas-venta/2)
+Route::get('ver-nota-venta', [NotaVentaController::class, 'showByQuery'])->name('notas-venta.ver');
+
+// Eliminar nota por POST a URL de un segmento (evita que en cPanel la sesión no se reconozca en /notas-venta/2)
+Route::post('eliminar-nota-venta', [NotaVentaController::class, 'destroyByQuery'])->name('notas-venta.eliminar');
+
 /*
 |--------------------------------------------------------------------------
 | Rutas de la aplicación (requieren autenticación)

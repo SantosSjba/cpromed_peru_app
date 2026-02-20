@@ -109,6 +109,35 @@ class NotaVentaController extends Controller
             ->with('success', 'Nota de venta guardada correctamente.');
     }
 
+    /**
+     * Ver nota por query string (?id=2). Ruta fuera del middleware auth para evitar
+     * que en cPanel la sesión no se reconozca en URLs con segmento (/notas-venta/2).
+     */
+    public function showByQuery(Request $request): View|RedirectResponse
+    {
+        if (! Auth::check()) {
+            return redirect()->route('signin')
+                ->with('error', 'Inicia sesión para ver el detalle de la nota.');
+        }
+
+        $id = $request->query('id');
+        if ($id === null || $id === '' || (int) $id < 1) {
+            return redirect()->route('notas-venta.index')
+                ->with('error', 'Falta el número de nota.');
+        }
+
+        $notaVenta = NotaVenta::find((int) $id);
+        if (! $notaVenta) {
+            return redirect()->route('notas-venta.index')
+                ->with('error', 'No se encontró esa nota de venta.');
+        }
+
+        return view('pages.notas-venta.show', [
+            'title' => 'Nota de venta ' . $notaVenta->numero_documento,
+            'nota' => $notaVenta,
+        ]);
+    }
+
     public function show(NotaVenta $notaVenta): View|RedirectResponse
     {
         if ($notaVenta->user_id !== Auth::id()) {
@@ -119,6 +148,35 @@ class NotaVentaController extends Controller
             'title' => 'Nota de venta ' . $notaVenta->numero_documento,
             'nota' => $notaVenta,
         ]);
+    }
+
+    /**
+     * Eliminar nota por POST a /eliminar-nota-venta con id en el body. Ruta fuera del middleware auth
+     * para que en cPanel la sesión se reconozca (misma idea que Ver y PDF).
+     */
+    public function destroyByQuery(Request $request): RedirectResponse
+    {
+        if (! Auth::check()) {
+            return redirect()->route('signin')
+                ->with('error', 'Inicia sesión para continuar.');
+        }
+
+        $id = $request->input('id');
+        if ($id === null || $id === '' || (int) $id < 1) {
+            return redirect()->route('notas-venta.index')
+                ->with('error', 'Falta el número de nota.');
+        }
+
+        $notaVenta = NotaVenta::find((int) $id);
+        if (! $notaVenta) {
+            return redirect()->route('notas-venta.index')
+                ->with('error', 'No se encontró esa nota de venta.');
+        }
+
+        $notaVenta->delete();
+
+        return redirect()->route('notas-venta.index')
+            ->with('success', 'Nota de venta eliminada correctamente.');
     }
 
     public function destroy(NotaVenta $notaVenta): RedirectResponse
