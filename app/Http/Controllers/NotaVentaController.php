@@ -153,8 +153,12 @@ class NotaVentaController extends Controller
             return $this->pdf($notaVenta);
         } catch (\Throwable $e) {
             report($e);
+            $message = 'No se pudo generar el PDF. Vuelve a intentarlo.';
+            if (config('app.debug')) {
+                $message .= ' (' . $e->getMessage() . ')';
+            }
             return redirect()->route('notas-venta.index')
-                ->with('error', 'No se pudo generar el PDF. Vuelve a intentarlo.');
+                ->with('error', $message);
         }
     }
 
@@ -177,7 +181,15 @@ class NotaVentaController extends Controller
         $pdf = Pdf::loadView('pdf.nota-venta', $data);
         $pdf->setPaper('a4');
 
-        return $pdf->download('nota_venta_' . $notaVenta->numero_documento . '.pdf');
+        // Nombre de archivo seguro para descarga
+        $filename = 'nota_venta_' . preg_replace('/[^a-zA-Z0-9\-_]/', '_', $notaVenta->numero_documento) . '.pdf';
+
+        $response = $pdf->download($filename);
+        $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+
+        return $response;
     }
 
     private function prepareDataForPdf(NotaVenta $nota): array
@@ -238,9 +250,15 @@ class NotaVentaController extends Controller
             ['path' => public_path('images/logo/logo.png'), 'mime' => 'image/png'],
         ];
         foreach ($paths as $item) {
-            if (file_exists($item['path'])) {
-                $data = base64_encode(file_get_contents($item['path']));
-                return 'data:' . $item['mime'] . ';base64,' . $data;
+            try {
+                if (file_exists($item['path']) && is_readable($item['path'])) {
+                    $data = @file_get_contents($item['path']);
+                    if ($data !== false) {
+                        return 'data:' . $item['mime'] . ';base64,' . base64_encode($data);
+                    }
+                }
+            } catch (\Throwable) {
+                continue;
             }
         }
         return '';

@@ -23,6 +23,20 @@ Route::get('test-pdf-route', function () {
     ]);
 });
 
+// Prueba de generación PDF (solo si estás logueado): descarga un PDF de prueba para verificar DomPDF en el servidor
+Route::get('test-pdf-download', function () {
+    if (! auth()->check()) {
+        return redirect()->route('signin')->with('error', 'Inicia sesión para probar el PDF.');
+    }
+    try {
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML('<h1>Prueba PDF</h1><p>Si descargas este archivo, DomPDF funciona en el servidor.</p>');
+        $pdf->setPaper('a4');
+        return $pdf->download('test-pdf.pdf');
+    } catch (\Throwable $e) {
+        return response('Error DomPDF: ' . $e->getMessage(), 500, ['Content-Type' => 'text/plain; charset=UTF-8']);
+    }
+})->name('test-pdf-download');
+
 // PDF sin middleware auth: la autenticación se comprueba en el controlador (evita 404 en algunos cPanel)
 Route::get('descargar-nota-pdf', [NotaVentaController::class, 'pdfByQuery'])->name('notas-venta.pdf');
 

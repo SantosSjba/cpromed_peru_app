@@ -34,6 +34,7 @@
                 updateTheme() {
                     const html = document.documentElement;
                     const body = document.body;
+                    if (!body) return;
                     if (this.theme === 'dark') {
                         html.classList.add('dark');
                         body.classList.add('dark', 'bg-gray-900');
@@ -75,18 +76,28 @@
         });
     </script>
 
-    <!-- Apply dark mode immediately to prevent flash -->
+    <!-- Apply dark mode when DOM is ready (evita "document.body" null en <head>) -->
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('theme');
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            const theme = savedTheme || systemTheme;
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                document.body.classList.add('dark', 'bg-gray-900');
+            function applyTheme() {
+                const html = document.documentElement;
+                const body = document.body;
+                if (!body) return;
+                const savedTheme = localStorage.getItem('theme');
+                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const theme = savedTheme || systemTheme;
+                if (theme === 'dark') {
+                    html.classList.add('dark');
+                    body.classList.add('dark', 'bg-gray-900');
+                } else {
+                    html.classList.remove('dark');
+                    body.classList.remove('dark', 'bg-gray-900');
+                }
+            }
+            if (document.body) {
+                applyTheme();
             } else {
-                document.documentElement.classList.remove('dark');
-                document.body.classList.remove('dark', 'bg-gray-900');
+                document.addEventListener('DOMContentLoaded', applyTheme);
             }
         })();
     </script>
