@@ -160,13 +160,13 @@ class NotaVentaController extends Controller
     /**
      * PDF por ID en la ruta (notas-venta/pdf/{id}).
      */
-    public function pdfById(int $id)
+    public function pdfById(int $id): Response
     {
         $notaVenta = NotaVenta::findOrFail($id);
         return $this->pdf($notaVenta);
     }
 
-    public function pdf(NotaVenta $notaVenta)
+    public function pdf(NotaVenta $notaVenta): Response
     {
 
         $data = $this->prepareDataForPdf($notaVenta);
