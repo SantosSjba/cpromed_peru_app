@@ -144,11 +144,6 @@ class NotaVentaController extends Controller
                 ->with('error', 'No se encontró esa nota de venta.');
         }
 
-        if ($notaVenta->user_id !== Auth::id()) {
-            return redirect()->route('notas-venta.index')
-                ->with('error', 'No tienes permiso para descargar esa nota de venta.');
-        }
-
         try {
             return $this->pdf($notaVenta);
         } catch (\Throwable $e) {
@@ -173,9 +168,6 @@ class NotaVentaController extends Controller
 
     public function pdf(NotaVenta $notaVenta)
     {
-        if ($notaVenta->user_id !== Auth::id()) {
-            abort(404);
-        }
 
         $data = $this->prepareDataForPdf($notaVenta);
         $pdf = Pdf::loadView('pdf.nota-venta', $data);
