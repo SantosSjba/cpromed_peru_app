@@ -23,6 +23,9 @@ Route::get('test-pdf-route', function () {
     ]);
 });
 
+// PDF sin middleware auth: la autenticación se comprueba en el controlador (evita 404 en algunos cPanel)
+Route::get('descargar-nota-pdf', [NotaVentaController::class, 'pdfByQuery'])->name('notas-venta.pdf');
+
 /*
 |--------------------------------------------------------------------------
 | Rutas de la aplicación (requieren autenticación)
@@ -42,8 +45,6 @@ Route::middleware('auth')->group(function () {
     })->name('profile');
 
     // Notas de venta (migrado desde admintopico)
-    // PDF con query string (?id=2): máxima compatibilidad cPanel cuando mod_rewrite falla
-    Route::get('descargar-nota-pdf', [NotaVentaController::class, 'pdfByQuery'])->name('notas-venta.pdf');
     Route::get('notas-venta/pdf/{id}', [NotaVentaController::class, 'pdfById'])->name('notas-venta.pdf.id');
     Route::get('notas-venta/{notaVenta}/pdf', [NotaVentaController::class, 'pdf'])->name('notas-venta.pdf.slug');
     Route::resource('notas-venta', NotaVentaController::class)->only(['index', 'create', 'store', 'show']);

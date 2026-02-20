@@ -8,6 +8,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Symfony\Component\HttpFoundation\Response;
 
 class NotaVentaController extends Controller
 {
@@ -121,12 +122,32 @@ class NotaVentaController extends Controller
     }
 
     /**
-     * PDF por query string (?id=2) — usa cuando en cPanel la ruta con segmentos da 404.
+     * PDF por query string (?id=2). Ruta fuera del middleware auth para evitar 404 en cPanel.
+     * La autenticación y validación se hacen aquí.
      */
-    public function pdfByQuery(Request $request)
+    public function pdfByQuery(Request $request): Response|RedirectResponse
     {
-        $id = $request->integer('id');
-        $notaVenta = NotaVenta::findOrFail($id);
+        if (! Auth::check()) {
+            return redirect()->route('signin')
+                ->with('error', 'Inicia sesión y usa el enlace PDF desde el listado de notas de venta.');
+        }
+
+        $id = $request->query('id');
+        if ($id === null || $id === '' || (int) $id < 1) {
+            return redirect()->route('notas-venta.index')
+                ->with('error', 'Falta el número de nota. Usa el enlace PDF del listado.');
+        }
+
+        $notaVenta = NotaVenta::find((int) $id);
+        if (! $notaVenta) {
+            return redirect()->route('notas-venta.index')
+                ->with('error', 'No se encontró esa nota de venta.');
+        }
+
+        if ($notaVenta->user_id !== Auth::id()) {
+            abort(404);
+        }
+
         return $this->pdf($notaVenta);
     }
 

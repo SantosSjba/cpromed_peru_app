@@ -25,6 +25,11 @@
                             </p>
                         </div>
                         <div>
+                            @if (session('error'))
+                                <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
                             @if ($errors->any())
                                 <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
                                     @foreach ($errors->all() as $err)
