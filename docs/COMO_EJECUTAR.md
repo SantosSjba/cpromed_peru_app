@@ -122,7 +122,7 @@ Si aun así sale 404:
 
 1. **Document root:** En cPanel → Dominios / Subdominios, el directorio del sitio debe ser la carpeta **`public`** del proyecto (no la raíz del proyecto).
 2. **mod_rewrite (Apache):** En cPanel busca **"Apache Modules"** o **"Select PHP Version"** → **"Extensions"** / **"Apache"** y asegúrate de que **mod_rewrite** esté activado. Sin esto, Laravel no puede enrutar y casi todo dará 404.
-3. **.htaccess:** Dentro de **public** debe existir el **.htaccess** con las reglas que envían las peticiones a `index.php`. Si al subir ves error 500, quita la línea `Options -MultiViews` del .htaccess.
+3. **.htaccess:** El **public/.htaccess** del proyecto ya está ajustado para cPanel (sin `Options -MultiViews`). No lo borres. Si aun así las rutas dan 404, pide al soporte del hosting que en el directorio `public` tengan **AllowOverride All** (o al menos **FileInfo**) para que Apache aplique las reglas de reescritura.
 4. **Caché de rutas:** En el servidor (SSH o terminal de cPanel) ejecuta:
    ```bash
    php artisan route:clear
