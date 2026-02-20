@@ -136,3 +136,24 @@ Si aun así sale 404:
    Si ves el texto "OK - Laravel enruta correctamente...", el servidor y mod_rewrite están bien. Si da 404, el document root o el .htaccess no están correctos.
 
 6. **No hace falta activar extensiones PHP para el PDF.** DomPDF usa extensiones estándar (dom, gd, mbstring, etc.). La extensión "pdf" de la lista de PHP en cPanel no es necesaria para esta aplicación.
+
+### Si te redirige a Iniciar sesión al abrir rutas como /notas-venta/2 (pero sí estás logueado)
+
+En producción con **HTTPS** la sesión debe enviarse con la cookie segura. En el **.env del servidor** (cPanel → Archivos → `.env` en la raíz del proyecto) revisa:
+
+1. **APP_URL** debe ser la URL real del sitio con `https://`:
+   ```env
+   APP_URL=https://cpromedperu.factosysperu.com
+   ```
+   (sustituye por tu dominio real). Así las redirecciones y la cookie de sesión se generan correctamente.
+
+2. **SESSION_DOMAIN**: déjalo **sin definir** o vacío (no pongas la palabra `null`). Si está definido como `SESSION_DOMAIN=null`, quita esa línea o déjala en blanco: `SESSION_DOMAIN=`.
+
+3. **SESSION_SECURE_COOKIE** (opcional): si usas HTTPS, puedes poner `SESSION_SECURE_COOKIE=true`. Si no lo defines, la aplicación ya activa la cookie segura cuando `APP_URL` empieza por `https://`.
+
+Después de cambiar `.env` en el servidor, limpia la configuración:
+```bash
+php artisan config:clear
+php artisan cache:clear
+```
+Luego cierra sesión, vuelve a iniciar sesión en el sitio y prueba de nuevo un enlace como `/notas-venta/2`.

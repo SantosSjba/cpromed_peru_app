@@ -156,7 +156,10 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => (function () {
+        $d = env('SESSION_DOMAIN');
+        return ($d === null || $d === '' || $d === 'null') ? null : $d;
+    })(),
 
     /*
     |--------------------------------------------------------------------------
@@ -169,7 +172,7 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'secure' => filter_var(env('SESSION_SECURE_COOKIE'), FILTER_VALIDATE_BOOLEAN) ?: str_starts_with(env('APP_URL', 'http://'), 'https://'),
 
     /*
     |--------------------------------------------------------------------------
