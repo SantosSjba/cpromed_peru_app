@@ -16,6 +16,7 @@ Route::get('/signup', [AuthController::class, 'showRegisterForm'])->name('signup
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get')->middleware('auth');
 
 // Prueba de enrutado en cPanel: si ves "OK" aquí, Laravel y mod_rewrite funcionan (borrar en producción)
 Route::get('test-pdf-route', function () {
