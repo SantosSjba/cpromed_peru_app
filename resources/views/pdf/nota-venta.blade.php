@@ -41,18 +41,19 @@
             letter-spacing: 0.5px;
         }
         .sale-info {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-size: 9pt;
         }
-        table.sale-info {
-            width: 100%;
+        .sale-info-row {
+            margin-bottom: 6px;
         }
-        table.sale-info td {
-            padding: 2px 10px 2px 0;
-            vertical-align: top;
+        .sale-info-label {
+            font-weight: bold;
+            margin-bottom: 1px;
         }
-        table.sale-info td:first-child {
-            padding-left: 0;
+        .sale-info-value {
+            padding-left: 18px;
+            margin-bottom: 4px;
         }
         .section-title {
             font-size: 10pt;
@@ -158,20 +159,39 @@
 
     <div class="doc-title">Nota de Venta</div>
 
-    <table class="sale-info" width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-            <td><strong>N°:</strong> {{ $noteNumber }}</td>
-            <td><strong>Fecha de Emisión:</strong> {{ $date }}</td>
-            <td><strong>Fecha de Vencimiento:</strong> {{ $dueDate }}</td>
-            <td><strong>Moneda:</strong> {{ $currency }}</td>
-        </tr>
-    </table>
+    <div class="sale-info">
+        <div class="sale-info-row">
+            <div class="sale-info-label">N°:</div>
+            <div class="sale-info-value">{{ $noteNumber }}</div>
+        </div>
+        <div class="sale-info-row">
+            <div class="sale-info-label">Fecha de Emisión:</div>
+            <div class="sale-info-value">{{ $date }}</div>
+        </div>
+        <div class="sale-info-row">
+            <div class="sale-info-label">Fecha de Vencimiento:</div>
+            <div class="sale-info-value">{{ $dueDate }}</div>
+        </div>
+        <div class="sale-info-row">
+            <div class="sale-info-label">Moneda:</div>
+            <div class="sale-info-value">{{ $currency }}</div>
+        </div>
+    </div>
 
     <div class="section-title">Cliente</div>
     <div class="client-info">
-        <div><strong>Nombre:</strong> {{ $clientName }}</div>
-        <div><strong>DNI/RUC:</strong> {{ $clientRuc }}</div>
-        <div><strong>Dirección:</strong> {{ $clientAddress }}</div>
+        <div class="sale-info-row">
+            <div class="sale-info-label">Nombre:</div>
+            <div class="sale-info-value">{{ $clientName }}</div>
+        </div>
+        <div class="sale-info-row">
+            <div class="sale-info-label">DNI/RUC:</div>
+            <div class="sale-info-value">{{ $clientRuc }}</div>
+        </div>
+        <div class="sale-info-row">
+            <div class="sale-info-label">Dirección:</div>
+            <div class="sale-info-value">{{ $clientAddress }}</div>
+        </div>
     </div>
 
     <table class="items">
@@ -226,6 +246,6 @@
         </div>
     @endif
 
-    <div class="footer-motto">CPROMED PERU — Centro de curaciones de heridas; cuidado, innovación y recuperación.</div>
+    <div class="footer-motto">CPROMED PERU — CENTRO DE INMUNOTERAPIA & MEDICINA ALTERNATIVA</div>
 </body>
 </html>
