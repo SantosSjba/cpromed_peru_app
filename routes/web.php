@@ -49,9 +49,10 @@ Route::get('ver-nota-venta', [NotaVentaController::class, 'showByQuery'])->name(
 // Eliminar nota por POST a URL de un segmento (evita que en cPanel la sesión no se reconozca en /notas-venta/2)
 Route::post('eliminar-nota-venta', [NotaVentaController::class, 'destroyByQuery'])->name('notas-venta.eliminar');
 
-// Historia clínica por query string (evita 404 en cPanel con URLs tipo /historia-clinica/1)
+// Historia clínica por query string (misma lógica que notas de venta: evita 404 en cPanel)
 Route::get('ver-historia-clinica', [HistoriaClinicaController::class, 'showByQuery'])->name('historia-clinica.ver');
-Route::get('descargar-historia-clinica-pdf', [HistoriaClinicaController::class, 'pdfByQuery'])->name('historia-clinica.pdf.download');
+Route::get('descargar-historia-clinica-pdf', [HistoriaClinicaController::class, 'pdfByQuery'])->name('historia-clinica.pdf');
+Route::post('eliminar-historia-clinica', [HistoriaClinicaController::class, 'destroyByQuery'])->name('historia-clinica.eliminar');
 
 /*
 |--------------------------------------------------------------------------
@@ -130,7 +131,7 @@ Route::middleware('auth')->group(function () {
     Route::post('historia-clinica', [HistoriaClinicaController::class, 'store'])->name('historia-clinica.store');
     Route::get('historia-clinica/examenes/{examen}/descargar', [HistoriaClinicaController::class, 'downloadExamen'])->name('historia-clinica.examenes.download');
     Route::get('historia-clinica/examenes/{examen}/ver', [HistoriaClinicaController::class, 'verExamen'])->name('historia-clinica.examenes.ver');
-    Route::get('historia-clinica/{paciente}/pdf', [HistoriaClinicaController::class, 'pdfHistoriaClinica'])->name('historia-clinica.pdf');
+    Route::get('historia-clinica/{paciente}/pdf', [HistoriaClinicaController::class, 'pdfHistoriaClinica'])->name('historia-clinica.pdf.slug');
     Route::get('historia-clinica/{paciente}', [HistoriaClinicaController::class, 'show'])->name('historia-clinica.show');
     Route::get('historia-clinica/{paciente}/editar', [HistoriaClinicaController::class, 'edit'])->name('historia-clinica.edit');
     Route::put('historia-clinica/{paciente}', [HistoriaClinicaController::class, 'update'])->name('historia-clinica.update');

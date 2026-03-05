@@ -442,6 +442,41 @@ class HistoriaClinicaController extends Controller
         );
     }
 
+    /**
+     * Eliminar historia clínica por POST a /eliminar-historia-clinica con id en el body.
+     * Misma lógica que notas de venta: ruta fuera del middleware auth para cPanel.
+     */
+    public function destroyByQuery(Request $request): RedirectResponse
+    {
+        if (! Auth::check()) {
+            return redirect()->route('signin')
+                ->with('error', 'Inicia sesión para continuar.');
+        }
+
+        $id = $request->input('id');
+        if ($id === null || $id === '' || (int) $id < 1) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'Falta el número de paciente.');
+        }
+
+        $paciente = Paciente::find((int) $id);
+        if (! $paciente || $paciente->user_id !== Auth::id()) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'No se encontró esa historia clínica.');
+        }
+
+        $paciente->load('pacienteExamenes');
+        foreach ($paciente->pacienteExamenes as $examen) {
+            if (Storage::disk('local')->exists($examen->path)) {
+                Storage::disk('local')->delete($examen->path);
+            }
+        }
+        $paciente->delete();
+
+        return redirect()->route('historia-clinica.index')
+            ->with('success', 'Historia clínica eliminada correctamente.');
+    }
+
     public function destroy(Paciente $paciente): RedirectResponse
     {
         if ($paciente->user_id !== Auth::id()) {

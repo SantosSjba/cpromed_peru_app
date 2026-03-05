@@ -80,12 +80,15 @@
                                         <a href="{{ route('historia-clinica.ver', ['id' => $p->id]) }}" class="rounded-lg px-3 py-1.5 text-brand-600 font-medium hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10">
                                             Ver
                                         </a>
+                                        <a href="{{ route('historia-clinica.pdf', ['id' => $p->id]) }}" class="rounded-lg px-3 py-1.5 text-gray-600 font-medium hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800">
+                                            PDF
+                                        </a>
                                         <a href="{{ route('historia-clinica.edit', $p) }}" class="rounded-lg px-3 py-1.5 text-gray-600 font-medium hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800">
                                             Editar
                                         </a>
-                                        <form action="{{ route('historia-clinica.destroy', $p) }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar toda la historia clínica de este paciente? Se borrarán sus consultas y exámenes.');">
+                                        <form action="{{ route('historia-clinica.eliminar') }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar toda la historia clínica de este paciente? Se borrarán sus consultas y exámenes.');">
                                             @csrf
-                                            @method('DELETE')
+                                            <input type="hidden" name="id" value="{{ $p->id }}">
                                             <button type="submit" class="rounded-lg px-3 py-1.5 text-red-600 font-medium hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10">
                                                 Eliminar
                                             </button>
