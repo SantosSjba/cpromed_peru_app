@@ -20,7 +20,7 @@ class MenuHelper
             [
                 'icon' => 'forms',
                 'name' => 'Historia clínica',
-                'path' => '/listado-historia-clinica',
+                'path' => '/historia-clinica',
             ],
         ];
     }

@@ -183,3 +183,14 @@ Si cPanel muestra que **no se puede implementar** y pide:
    git push
    ```
    Luego en cPanel: **Git Version Control** → tu repositorio → **Pull or Deploy** → **Update from Remote**. Después de que la rama esté actualizada y sin cambios pendientes, podrás usar **Deploy HEAD Commit**.
+
+### Después de desplegar: rutas nuevas o 404 en páginas que sí existen
+
+Si tras un despliegue una URL da **404** (por ejemplo `/historia-clinica`) y en local funciona, suele ser caché de rutas en el servidor. En SSH del servidor (o Terminal de cPanel) ejecuta:
+```bash
+cd /home/tu_usuario/public_html   # o la ruta donde está la app
+php artisan route:clear
+php artisan config:clear
+php artisan cache:clear
+```
+Si usas `php artisan route:cache` en producción, después de cambiar rutas vuelve a ejecutarlo: `php artisan route:cache`.
