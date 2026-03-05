@@ -124,8 +124,9 @@ Route::middleware('auth')->group(function () {
         return view('pages.ui-elements.videos', ['title' => 'Videos']);
     })->name('videos');
 
-    // Historia clínica
-    Route::get('/historia-clinica', [HistoriaClinicaController::class, 'index'])->name('historia-clinica.index');
+    // Historia clínica (ruta con guion puede fallar en algunos cPanel; listado-historia-clinica es alternativa)
+    Route::get('/listado-historia-clinica', [HistoriaClinicaController::class, 'index'])->name('historia-clinica.index');
+    Route::get('/historia-clinica', [HistoriaClinicaController::class, 'index']);
     Route::get('/historia-clinica/crear', [HistoriaClinicaController::class, 'create'])->name('historia-clinica.create');
     Route::post('/historia-clinica', [HistoriaClinicaController::class, 'store'])->name('historia-clinica.store');
     Route::get('/historia-clinica/examenes/{examen}/descargar', [HistoriaClinicaController::class, 'downloadExamen'])->name('historia-clinica.examenes.download');

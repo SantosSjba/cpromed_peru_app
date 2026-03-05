@@ -16,25 +16,36 @@ use Symfony\Component\HttpFoundation\Response;
 
 class HistoriaClinicaController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
-        $query = Paciente::where('user_id', Auth::id())->with('historiaClinicaFicha');
-
-        if ($request->filled('buscar')) {
-            $term = $request->input('buscar');
-            $query->where(function ($q) use ($term) {
-                $q->where('nombres', 'like', "%{$term}%")
-                    ->orWhere('apellidos', 'like', "%{$term}%")
-                    ->orWhere('dni', 'like', "%{$term}%");
-            });
+        if (! Auth::check()) {
+            return redirect()->route('signin')->with('error', 'Inicia sesión para acceder.');
         }
 
-        $pacientes = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
+        $buscar = is_string($request->input('buscar')) ? trim($request->input('buscar')) : '';
+
+        try {
+            $query = Paciente::where('user_id', Auth::id())->with('historiaClinicaFicha');
+
+            if ($buscar !== '') {
+                $term = '%' . $buscar . '%';
+                $query->where(function ($q) use ($term) {
+                    $q->where('nombres', 'like', $term)
+                        ->orWhere('apellidos', 'like', $term)
+                        ->orWhere('dni', 'like', $term);
+                });
+            }
+
+            $pacientes = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
+        } catch (\Throwable $e) {
+            report($e);
+            return redirect()->route('dashboard')->with('error', 'Error al cargar historia clínica. Revisa los logs.');
+        }
 
         return view('pages.historia-clinica.index', [
             'title' => 'Historia clínica',
             'pacientes' => $pacientes,
-            'buscar' => $request->input('buscar', ''),
+            'buscar' => $buscar,
         ]);
     }
 
