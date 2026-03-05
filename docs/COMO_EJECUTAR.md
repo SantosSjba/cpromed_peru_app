@@ -161,3 +161,25 @@ php artisan config:clear
 php artisan cache:clear
 ```
 Luego cierra sesión, vuelve a iniciar sesión en el sitio y prueba de nuevo un enlace como `/notas-venta/2`.
+
+### "El sistema no se puede implementar" en cPanel (Git Deploy)
+
+Si cPanel muestra que **no se puede implementar** y pide:
+
+1. **"A valid .cpanel.yml file exists"**  
+   En la raíz del proyecto hay un archivo `.cpanel.yml` que define cómo desplegar. Debe estar **confirmado en Git** (no solo en tu PC). Haz commit y push del archivo:
+   ```bash
+   git add .cpanel.yml
+   git commit -m "Añadir .cpanel.yml para despliegue cPanel"
+   git push
+   ```
+
+2. **"No existen cambios no confirmados en la rama extraída"**  
+   cPanel solo despliega cuando la rama del repositorio está **limpia** (todo confirmado). En tu máquina:
+   ```bash
+   git status
+   git add .
+   git commit -m "Confirmar cambios para despliegue"
+   git push
+   ```
+   Luego en cPanel: **Git Version Control** → tu repositorio → **Pull or Deploy** → **Update from Remote**. Después de que la rama esté actualizada y sin cambios pendientes, podrás usar **Deploy HEAD Commit**.

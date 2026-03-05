@@ -1,0 +1,29 @@
+# cPanel Git Deployment - Laravel (Cepromed)
+# Documentación: https://docs.cpanel.net/knowledge-base/web-services/guide-to-git-deployment/
+#
+# Requisitos para que cPanel permita desplegar:
+# 1. Este archivo .cpanel.yml debe existir en la raíz y estar confirmado (commit) en la rama.
+# 2. No debe haber cambios sin confirmar en la rama (commit + push todo antes de desplegar).
+#
+# En cPanel, configura el Document Root del dominio apuntando a: [DEPLOYPATH]/public
+# Ejemplo: si DEPLOYPATH=/home/usuario/public_html, el document root debe ser public_html/public
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/public_html
+    - /bin/cp -R app $DEPLOYPATH
+    - /bin/cp -R bootstrap $DEPLOYPATH
+    - /bin/cp -R config $DEPLOYPATH
+    - /bin/cp -R database $DEPLOYPATH
+    - /bin/cp -R public $DEPLOYPATH
+    - /bin/cp -R resources $DEPLOYPATH
+    - /bin/cp -R routes $DEPLOYPATH
+    - /bin/cp -R storage $DEPLOYPATH
+    - /bin/cp artisan $DEPLOYPATH
+    - /bin/cp composer.json $DEPLOYPATH
+    - /bin/cp composer.lock $DEPLOYPATH
+    - test -d public/build && /bin/cp -R public/build $DEPLOYPATH/public/ || true
+    - cd $DEPLOYPATH && composer install --no-dev --optimize-autoloader --no-interaction || true
+    - cd $DEPLOYPATH && php artisan config:cache || true
+    - cd $DEPLOYPATH && php artisan route:cache || true
+    - cd $DEPLOYPATH && php artisan view:cache || true
