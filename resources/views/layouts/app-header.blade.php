@@ -64,12 +64,11 @@
                 </svg>
             </button>
 
-            <!-- Search Bar (desktop only) -->
+            {{-- Search Bar (desktop only) - oculto por ahora
             <div class="hidden xl:block">
                 <form>
                     <div class="relative">
                         <span class="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">
-                            <!-- Search Icon -->
                             <svg class="fill-gray-500 dark:fill-gray-400" width="20" height="20"
                                 viewBox="0 0 20 20" fill="none">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
@@ -87,6 +86,7 @@
                     </div>
                 </form>
             </div>
+            --}}
         </div>
 
         <!-- Application Menu (mobile) and Right Side Actions (desktop) -->
@@ -111,8 +111,9 @@
                     </svg>
                 </button>
 
-                <!-- Notification Dropdown -->
+                {{-- Icono de alertas / notificaciones - oculto por ahora
                 <x-header.notification-dropdown />
+                --}}
             </div>
 
             <!-- User Dropdown -->

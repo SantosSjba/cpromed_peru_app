@@ -126,6 +126,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/historia-clinica', [HistoriaClinicaController::class, 'store'])->name('historia-clinica.store');
     Route::get('/historia-clinica/examenes/{examen}/descargar', [HistoriaClinicaController::class, 'downloadExamen'])->name('historia-clinica.examenes.download');
     Route::get('/historia-clinica/examenes/{examen}/ver', [HistoriaClinicaController::class, 'verExamen'])->name('historia-clinica.examenes.ver');
+    Route::get('/historia-clinica/{paciente}/pdf', [HistoriaClinicaController::class, 'pdfHistoriaClinica'])->name('historia-clinica.pdf');
     Route::get('/historia-clinica/{paciente}', [HistoriaClinicaController::class, 'show'])->name('historia-clinica.show');
     Route::get('/historia-clinica/{paciente}/editar', [HistoriaClinicaController::class, 'edit'])->name('historia-clinica.edit');
     Route::put('/historia-clinica/{paciente}', [HistoriaClinicaController::class, 'update'])->name('historia-clinica.update');

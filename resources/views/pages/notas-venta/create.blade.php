@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb :pageTitle="$title" />
+    <x-common.page-breadcrumb :pageTitle="$title" :items="[['label' => 'Notas de venta', 'url' => route('notas-venta.index')], ['label' => 'Nueva nota de venta', 'url' => null]]" />
     <div class="space-y-6">
         <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-white/[0.02] lg:p-6"
             x-data="notaVentaForm({{ json_encode($clienteInit, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) }})">

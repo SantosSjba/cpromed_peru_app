@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb :pageTitle="$title" />
+    <x-common.page-breadcrumb :pageTitle="$title" :items="[['label' => 'Historia clínica', 'url' => route('historia-clinica.index')], ['label' => $paciente->nombre_completo, 'url' => route('historia-clinica.show', $paciente)], ['label' => 'Consulta ' . $consulta->fecha_consulta->format('d/m/Y'), 'url' => null]]" />
     <div class="space-y-6">
         {{-- Cabecera: paciente + fecha de consulta --}}
         <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-white/[0.03]">

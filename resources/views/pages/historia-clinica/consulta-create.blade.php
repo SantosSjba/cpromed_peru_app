@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb :pageTitle="$title" />
+    <x-common.page-breadcrumb :pageTitle="$title" :items="[['label' => 'Historia clínica', 'url' => route('historia-clinica.index')], ['label' => $paciente->nombre_completo, 'url' => route('historia-clinica.show', $paciente)], ['label' => 'Nueva consulta', 'url' => null]]" />
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         @if($errors->any())
             <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">

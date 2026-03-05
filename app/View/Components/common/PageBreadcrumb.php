@@ -9,11 +9,32 @@ use Illuminate\View\Component;
 class PageBreadcrumb extends Component
 {
     /**
+     * Current page title (used when $items is not provided).
+     */
+    public string $pageTitle;
+
+    /**
+     * Breadcrumb trail: array of ['label' => string, 'url' => string|null].
+     * Last item should have url null (current page). Home is prepended automatically.
+     */
+    public array $items;
+
+    /**
+     * Full trail passed to the view (Home + items, or Home + pageTitle).
+     */
+    public array $trail;
+
+    /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct(string $pageTitle = 'Page', array $items = [])
     {
-        //
+        $this->pageTitle = $pageTitle;
+        $this->items = $items;
+        $home = [['label' => 'Home', 'url' => url('/')]];
+        $this->trail = count($items) > 0
+            ? array_merge($home, $items)
+            : array_merge($home, [['label' => $pageTitle, 'url' => null]]);
     }
 
     /**

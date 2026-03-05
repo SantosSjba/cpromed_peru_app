@@ -6,11 +6,13 @@ use App\Models\Paciente;
 use App\Models\HistoriaClinicaFicha;
 use App\Models\HistoriaClinicaConsulta;
 use App\Models\PacienteExamen;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class HistoriaClinicaController extends Controller
 {
@@ -393,5 +395,49 @@ class HistoriaClinicaController extends Controller
         $paciente->delete();
         return redirect()->route('historia-clinica.index')
             ->with('success', 'Historia clínica eliminada correctamente.');
+    }
+
+    /**
+     * Genera PDF de la historia clínica del paciente (datos personales, ficha, consultas). No incluye exámenes.
+     */
+    public function pdfHistoriaClinica(Paciente $paciente): Response
+    {
+        if ($paciente->user_id !== Auth::id()) {
+            abort(404);
+        }
+        $paciente->load(['historiaClinicaFicha', 'historiaClinicaConsultas']);
+        $logoBase64 = $this->getLogoBase64();
+        $pdf = Pdf::loadView('pdf.historia-clinica', [
+            'paciente' => $paciente,
+            'logoBase64' => $logoBase64,
+        ]);
+        $pdf->setPaper('a4');
+        $filename = 'historia_clinica_' . preg_replace('/[^a-zA-Z0-9\-_]/', '_', $paciente->nombre_completo) . '_' . now()->format('Y-m-d') . '.pdf';
+        $response = $pdf->download($filename);
+        $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+        return $response;
+    }
+
+    private function getLogoBase64(): string
+    {
+        $paths = [
+            ['path' => public_path('logo_cpromed.jpg'), 'mime' => 'image/jpeg'],
+            ['path' => public_path('images/logo/logo.png'), 'mime' => 'image/png'],
+        ];
+        foreach ($paths as $item) {
+            try {
+                if (file_exists($item['path']) && is_readable($item['path'])) {
+                    $data = @file_get_contents($item['path']);
+                    if ($data !== false) {
+                        return 'data:' . $item['mime'] . ';base64,' . base64_encode($data);
+                    }
+                }
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+        return '';
     }
 }

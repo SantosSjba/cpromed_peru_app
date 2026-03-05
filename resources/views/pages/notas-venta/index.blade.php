@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb :pageTitle="$title" />
+    <x-common.page-breadcrumb :pageTitle="$title" :items="[['label' => 'Notas de venta', 'url' => null]]" />
     <div class="space-y-6">
         @if(session('success'))
             <div class="rounded-xl border border-green-200 bg-green-50/80 p-4 text-sm font-medium text-green-800 shadow-sm dark:border-green-800 dark:bg-green-900/20 dark:text-green-400">
