@@ -28,6 +28,7 @@ class Paciente extends Model
     ];
 
     protected $casts = [
+        'user_id'          => 'integer',
         'fecha_nacimiento' => 'date',
     ];
 
