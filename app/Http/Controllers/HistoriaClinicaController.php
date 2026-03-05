@@ -117,7 +117,7 @@ class HistoriaClinicaController extends Controller
             'recomendaciones' => $validated['recomendaciones'] ?? null,
         ]);
 
-        return redirect()->route('historia-clinica.show', $paciente)
+        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
             ->with('success', 'Historia clínica registrada correctamente.');
     }
 
@@ -150,6 +150,56 @@ class HistoriaClinicaController extends Controller
             'paciente' => $paciente,
             'examenesPorFecha' => $examenesPorFecha,
         ]);
+    }
+
+    /**
+     * Ver ficha del paciente por query string (?id=1). Evita 404 en cPanel con URLs /historia-clinica/1.
+     */
+    public function showByQuery(Request $request): View|RedirectResponse
+    {
+        if (! Auth::check()) {
+            return redirect()->route('signin')
+                ->with('error', 'Inicia sesión para ver la historia clínica.');
+        }
+
+        $id = $request->query('id');
+        if ($id === null || $id === '' || (int) $id < 1) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'Falta el número de paciente.');
+        }
+
+        $paciente = Paciente::find((int) $id);
+        if (! $paciente || $paciente->user_id !== Auth::id()) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'No se encontró esa historia clínica.');
+        }
+
+        return $this->show($paciente);
+    }
+
+    /**
+     * PDF de historia clínica por query string (?id=1). Evita 404 en cPanel.
+     */
+    public function pdfByQuery(Request $request): Response|RedirectResponse
+    {
+        if (! Auth::check()) {
+            return redirect()->route('signin')
+                ->with('error', 'Inicia sesión para descargar el PDF.');
+        }
+
+        $id = $request->query('id');
+        if ($id === null || $id === '' || (int) $id < 1) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'Falta el número de paciente.');
+        }
+
+        $paciente = Paciente::find((int) $id);
+        if (! $paciente || $paciente->user_id !== Auth::id()) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'No se encontró esa historia clínica.');
+        }
+
+        return $this->pdfHistoriaClinica($paciente);
     }
 
     public function edit(Paciente $paciente): View|RedirectResponse
@@ -232,7 +282,7 @@ class HistoriaClinicaController extends Controller
             ]);
         }
 
-        return redirect()->route('historia-clinica.show', $paciente)
+        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
             ->with('success', 'Historia clínica actualizada correctamente.');
     }
 
@@ -275,7 +325,7 @@ class HistoriaClinicaController extends Controller
             'recomendaciones' => $validated['recomendaciones'] ?? null,
         ]);
 
-        return redirect()->route('historia-clinica.show', $paciente)
+        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
             ->with('success', 'Consulta registrada correctamente.');
     }
 
@@ -343,7 +393,7 @@ class HistoriaClinicaController extends Controller
             ? 'Examen subido correctamente.'
             : "{$subidos} exámenes subidos correctamente.";
 
-        return redirect()->route('historia-clinica.show', $paciente)
+        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
             ->with('success', $mensaje);
     }
 

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb :pageTitle="$title" :items="[['label' => 'Historia clínica', 'url' => route('historia-clinica.index')], ['label' => $paciente->nombre_completo, 'url' => route('historia-clinica.show', $paciente)], ['label' => 'Consulta ' . $consulta->fecha_consulta->format('d/m/Y'), 'url' => null]]" />
+    <x-common.page-breadcrumb :pageTitle="$title" :items="[['label' => 'Historia clínica', 'url' => route('historia-clinica.index')], ['label' => $paciente->nombre_completo, 'url' => route('historia-clinica.ver', ['id' => $paciente->id])], ['label' => 'Consulta ' . $consulta->fecha_consulta->format('d/m/Y'), 'url' => null]]" />
     <div class="space-y-6">
         {{-- Cabecera: paciente + fecha de consulta --}}
         <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-white/[0.03]">
@@ -25,7 +25,7 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('historia-clinica.show', $paciente) }}"
+                    <a href="{{ route('historia-clinica.ver', ['id' => $paciente->id]) }}"
                         class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                         Volver a historia clínica
@@ -70,7 +70,7 @@
         </div>
 
         <div class="flex flex-wrap gap-3">
-            <a href="{{ route('historia-clinica.show', $paciente) }}"
+            <a href="{{ route('historia-clinica.ver', ['id' => $paciente->id]) }}"
                 class="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Volver a historia clínica

@@ -49,6 +49,10 @@ Route::get('ver-nota-venta', [NotaVentaController::class, 'showByQuery'])->name(
 // Eliminar nota por POST a URL de un segmento (evita que en cPanel la sesión no se reconozca en /notas-venta/2)
 Route::post('eliminar-nota-venta', [NotaVentaController::class, 'destroyByQuery'])->name('notas-venta.eliminar');
 
+// Historia clínica por query string (evita 404 en cPanel con URLs tipo /historia-clinica/1)
+Route::get('ver-historia-clinica', [HistoriaClinicaController::class, 'showByQuery'])->name('historia-clinica.ver');
+Route::get('descargar-historia-clinica-pdf', [HistoriaClinicaController::class, 'pdfByQuery'])->name('historia-clinica.pdf.download');
+
 /*
 |--------------------------------------------------------------------------
 | Rutas de la aplicación (requieren autenticación)
