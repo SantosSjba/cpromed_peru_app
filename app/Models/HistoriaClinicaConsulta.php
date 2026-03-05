@@ -21,6 +21,7 @@ class HistoriaClinicaConsulta extends Model
     ];
 
     protected $casts = [
+        'paciente_id'    => 'integer',
         'fecha_consulta' => 'datetime',
     ];
 

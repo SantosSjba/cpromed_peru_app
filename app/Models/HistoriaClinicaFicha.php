@@ -22,6 +22,7 @@ class HistoriaClinicaFicha extends Model
     ];
 
     protected $casts = [
+        'paciente_id'    => 'integer',
         'cirugias_si_no' => 'boolean',
     ];
 

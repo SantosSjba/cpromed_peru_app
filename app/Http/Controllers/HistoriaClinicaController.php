@@ -134,7 +134,7 @@ class HistoriaClinicaController extends Controller
 
     public function show(Paciente $paciente): View|RedirectResponse
     {
-        if ($paciente->user_id !== Auth::id()) {
+        if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         $paciente->load(['historiaClinicaFicha', 'historiaClinicaConsultas' => fn ($q) => $q->orderByDesc('fecha_consulta')]);
@@ -180,7 +180,7 @@ class HistoriaClinicaController extends Controller
         }
 
         $paciente = Paciente::find((int) $id);
-        if (! $paciente || $paciente->user_id !== Auth::id()) {
+        if (! $paciente || (int) $paciente->user_id !== (int) Auth::id()) {
             return redirect()->route('historia-clinica.index')
                 ->with('error', 'No se encontró esa historia clínica.');
         }
@@ -205,7 +205,7 @@ class HistoriaClinicaController extends Controller
         }
 
         $paciente = Paciente::find((int) $id);
-        if (! $paciente || $paciente->user_id !== Auth::id()) {
+        if (! $paciente || (int) $paciente->user_id !== (int) Auth::id()) {
             return redirect()->route('historia-clinica.index')
                 ->with('error', 'No se encontró esa historia clínica.');
         }
@@ -215,7 +215,7 @@ class HistoriaClinicaController extends Controller
 
     public function edit(Paciente $paciente): View|RedirectResponse
     {
-        if ($paciente->user_id !== Auth::id()) {
+        if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         $paciente->load('historiaClinicaFicha');
@@ -227,7 +227,7 @@ class HistoriaClinicaController extends Controller
 
     public function update(Request $request, Paciente $paciente): RedirectResponse
     {
-        if ($paciente->user_id !== Auth::id()) {
+        if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         $validated = $request->validate([
@@ -299,7 +299,7 @@ class HistoriaClinicaController extends Controller
 
     public function createConsulta(Paciente $paciente): View|RedirectResponse
     {
-        if ($paciente->user_id !== Auth::id()) {
+        if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         return view('pages.historia-clinica.consulta-create', [
@@ -310,7 +310,7 @@ class HistoriaClinicaController extends Controller
 
     public function storeConsulta(Request $request, Paciente $paciente): RedirectResponse
     {
-        if ($paciente->user_id !== Auth::id()) {
+        if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         $validated = $request->validate([
@@ -342,7 +342,7 @@ class HistoriaClinicaController extends Controller
 
     public function showConsulta(Paciente $paciente, HistoriaClinicaConsulta $consulta): View|RedirectResponse
     {
-        if ($paciente->user_id !== Auth::id() || $consulta->paciente_id !== $paciente->id) {
+        if ((int) $paciente->user_id !== (int) Auth::id() || (int) $consulta->paciente_id !== (int) $paciente->id) {
             abort(404);
         }
         return view('pages.historia-clinica.consulta-show', [
@@ -354,7 +354,7 @@ class HistoriaClinicaController extends Controller
 
     public function storeExamen(Request $request, Paciente $paciente): RedirectResponse
     {
-        if ($paciente->user_id !== Auth::id()) {
+        if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         $request->validate([
@@ -410,7 +410,7 @@ class HistoriaClinicaController extends Controller
 
     public function downloadExamen(PacienteExamen $examen): \Symfony\Component\HttpFoundation\StreamedResponse|RedirectResponse
     {
-        if ($examen->paciente->user_id !== Auth::id()) {
+        if ((int) $examen->paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         if (! Storage::disk('local')->exists($examen->path)) {
@@ -425,7 +425,7 @@ class HistoriaClinicaController extends Controller
 
     public function verExamen(PacienteExamen $examen): \Symfony\Component\HttpFoundation\StreamedResponse|RedirectResponse
     {
-        if ($examen->paciente->user_id !== Auth::id()) {
+        if ((int) $examen->paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         if (! Storage::disk('local')->exists($examen->path)) {
@@ -460,7 +460,7 @@ class HistoriaClinicaController extends Controller
         }
 
         $paciente = Paciente::find((int) $id);
-        if (! $paciente || $paciente->user_id !== Auth::id()) {
+        if (! $paciente || (int) $paciente->user_id !== (int) Auth::id()) {
             return redirect()->route('historia-clinica.index')
                 ->with('error', 'No se encontró esa historia clínica.');
         }
@@ -479,7 +479,7 @@ class HistoriaClinicaController extends Controller
 
     public function destroy(Paciente $paciente): RedirectResponse
     {
-        if ($paciente->user_id !== Auth::id()) {
+        if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         $paciente->load('pacienteExamenes');
@@ -501,7 +501,7 @@ class HistoriaClinicaController extends Controller
     private function resolverPaciente(int $id): Paciente|RedirectResponse
     {
         $paciente = Paciente::find($id);
-        if (! $paciente || $paciente->user_id !== Auth::id()) {
+        if (! $paciente || (int) $paciente->user_id !== (int) Auth::id()) {
             return redirect()->route('historia-clinica.index')
                 ->with('error', 'No se encontró esa historia clínica.');
         }
@@ -555,7 +555,7 @@ class HistoriaClinicaController extends Controller
         if ($paciente instanceof RedirectResponse) return $paciente;
         $consultaId = (int) $request->query('consulta', 0);
         $consulta = HistoriaClinicaConsulta::find($consultaId);
-        if (! $consulta || $consulta->paciente_id !== $paciente->id) {
+        if (! $consulta || (int) $consulta->paciente_id !== (int) $paciente->id) {
             return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
                 ->with('error', 'No se encontró esa consulta.');
         }
@@ -574,7 +574,7 @@ class HistoriaClinicaController extends Controller
     {
         if ($r = $this->authGuard()) return $r;
         $examen = PacienteExamen::find((int) $request->query('id', 0));
-        if (! $examen || $examen->paciente->user_id !== Auth::id()) {
+        if (! $examen || (int) $examen->paciente->user_id !== (int) Auth::id()) {
             return redirect()->route('historia-clinica.index')
                 ->with('error', 'No se encontró ese examen.');
         }
@@ -585,7 +585,7 @@ class HistoriaClinicaController extends Controller
     {
         if ($r = $this->authGuard()) return $r;
         $examen = PacienteExamen::find((int) $request->query('id', 0));
-        if (! $examen || $examen->paciente->user_id !== Auth::id()) {
+        if (! $examen || (int) $examen->paciente->user_id !== (int) Auth::id()) {
             return redirect()->route('historia-clinica.index')
                 ->with('error', 'No se encontró ese examen.');
         }
@@ -597,7 +597,7 @@ class HistoriaClinicaController extends Controller
      */
     public function pdfHistoriaClinica(Paciente $paciente): Response
     {
-        if ($paciente->user_id !== Auth::id()) {
+        if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         $paciente->load(['historiaClinicaFicha', 'historiaClinicaConsultas']);
