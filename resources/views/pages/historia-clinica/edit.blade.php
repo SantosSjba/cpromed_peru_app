@@ -13,9 +13,9 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('historia-clinica.update', $paciente) }}" class="space-y-6">
+        <form method="POST" action="{{ route('historia-clinica.update') }}" class="space-y-6">
             @csrf
-            @method('PUT')
+            <input type="hidden" name="id" value="{{ $paciente->id }}">
 
             <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-white/[0.03]">
                 <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">

@@ -15,8 +15,9 @@
 
         <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">Paciente: <strong>{{ $paciente->nombre_completo }}</strong>. Esta consulta se guardará como una nueva fila en la tabla de consultas del paciente (fecha, motivo, enfermedad actual, Dx, Tx, Plan Dx, recomendaciones).</p>
 
-        <form method="POST" action="{{ route('historia-clinica.consultas.store', $paciente) }}">
+        <form method="POST" action="{{ route('historia-clinica.consultas.store') }}">
             @csrf
+            <input type="hidden" name="paciente_id" value="{{ $paciente->id }}">
             <div class="mb-6">
                 <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Datos de la consulta</h4>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

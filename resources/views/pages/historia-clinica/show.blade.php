@@ -39,7 +39,7 @@
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         Descargar PDF
                     </a>
-                    <a href="{{ route('historia-clinica.edit', $paciente) }}"
+                    <a href="{{ route('historia-clinica.edit', ['id' => $paciente->id]) }}"
                         class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         Editar
@@ -157,7 +157,7 @@
                     <h2 class="text-base font-semibold text-gray-900 dark:text-white">Tabla de consultas</h2>
                     <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Cada fila es una consulta. Un paciente puede tener muchas consultas.</p>
                 </div>
-                <a href="{{ route('historia-clinica.consultas.create', $paciente) }}"
+                <a href="{{ route('historia-clinica.consultas.create', ['paciente' => $paciente->id]) }}"
                     class="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 hover:bg-brand-600 shrink-0">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Nueva consulta
@@ -184,7 +184,7 @@
                                 <td class="px-5 py-3 text-gray-700 dark:text-gray-300">{{ Str::limit($c->enfermedad_actual, 35) ?: '—' }}</td>
                                 <td class="px-5 py-3 text-gray-700 dark:text-gray-300">{{ Str::limit($c->dx, 35) ?: '—' }}</td>
                                 <td class="px-5 py-3 text-right">
-                                    <a href="{{ route('historia-clinica.consultas.show', [$paciente, $c]) }}" class="font-medium text-brand-600 hover:underline dark:text-brand-400">Ver detalle</a>
+                                    <a href="{{ route('historia-clinica.consultas.show', ['paciente' => $paciente->id, 'consulta' => $c->id]) }}" class="font-medium text-brand-600 hover:underline dark:text-brand-400">Ver detalle</a>
                                 </td>
                             </tr>
                         @empty
@@ -209,8 +209,9 @@
             </div>
             <div id="form-examen" class="hidden border-b border-gray-200 p-6 dark:border-gray-700"
                 x-data="examenMultiForm()">
-                <form action="{{ route('historia-clinica.examenes.store', $paciente) }}" method="POST" enctype="multipart/form-data" class="rounded-xl border border-dashed border-gray-300 bg-gray-50/80 p-6 dark:border-gray-600 dark:bg-gray-800/30">
+                <form action="{{ route('historia-clinica.examenes.store') }}" method="POST" enctype="multipart/form-data" class="rounded-xl border border-dashed border-gray-300 bg-gray-50/80 p-6 dark:border-gray-600 dark:bg-gray-800/30">
                     @csrf
+                    <input type="hidden" name="paciente_id" value="{{ $paciente->id }}">
                     <div class="mb-4">
                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha del examen (común para todos)</label>
                         <input type="date" name="fecha_examen" value="{{ old('fecha_examen', now()->timezone('America/Lima')->format('Y-m-d')) }}" class="input-field max-w-xs" />
@@ -327,9 +328,9 @@
                                                 <td class="px-4 py-2.5 text-gray-600 dark:text-gray-400">{{ $e->descripcion ?? '—' }}</td>
                                                 <td class="px-4 py-2.5 text-right">
                                                     @if($esPdf)
-                                                        <a href="{{ route('historia-clinica.examenes.ver', $e) }}" target="_blank" rel="noopener noreferrer" class="font-medium text-brand-600 hover:underline dark:text-brand-400 mr-3">Ver</a>
+                                                        <a href="{{ route('historia-clinica.examenes.ver', ['id' => $e->id]) }}" target="_blank" rel="noopener noreferrer" class="font-medium text-brand-600 hover:underline dark:text-brand-400 mr-3">Ver</a>
                                                     @endif
-                                                    <a href="{{ route('historia-clinica.examenes.download', $e) }}" class="font-medium text-brand-600 hover:underline dark:text-brand-400">Descargar</a>
+                                                    <a href="{{ route('historia-clinica.examenes.download', ['id' => $e->id]) }}" class="font-medium text-brand-600 hover:underline dark:text-brand-400">Descargar</a>
                                                 </td>
                                             </tr>
                                         @endforeach

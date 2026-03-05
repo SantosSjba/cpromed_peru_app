@@ -493,6 +493,105 @@ class HistoriaClinicaController extends Controller
             ->with('success', 'Historia clínica eliminada correctamente.');
     }
 
+    // ─── Métodos ByQuery (cPanel): misma lógica que notas de venta ────────────────
+    // En este servidor cPanel cualquier URL con segmento dinámico devuelve 404.
+    // Estos métodos reciben los IDs por query string o body, encuentran el modelo
+    // manualmente y delegan en el método original.
+
+    private function resolverPaciente(int $id): Paciente|RedirectResponse
+    {
+        $paciente = Paciente::find($id);
+        if (! $paciente || $paciente->user_id !== Auth::id()) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'No se encontró esa historia clínica.');
+        }
+        return $paciente;
+    }
+
+    private function authGuard(): ?RedirectResponse
+    {
+        if (! Auth::check()) {
+            return redirect()->route('signin')->with('error', 'Inicia sesión para continuar.');
+        }
+        return null;
+    }
+
+    public function editByQuery(Request $request): View|RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $paciente = $this->resolverPaciente((int) $request->query('id', 0));
+        if ($paciente instanceof RedirectResponse) return $paciente;
+        return $this->edit($paciente);
+    }
+
+    public function updateByQuery(Request $request): RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $paciente = $this->resolverPaciente((int) $request->input('id', 0));
+        if ($paciente instanceof RedirectResponse) return $paciente;
+        return $this->update($request, $paciente);
+    }
+
+    public function createConsultaByQuery(Request $request): View|RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $paciente = $this->resolverPaciente((int) $request->query('paciente', 0));
+        if ($paciente instanceof RedirectResponse) return $paciente;
+        return $this->createConsulta($paciente);
+    }
+
+    public function storeConsultaByQuery(Request $request): RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $paciente = $this->resolverPaciente((int) $request->input('paciente_id', 0));
+        if ($paciente instanceof RedirectResponse) return $paciente;
+        return $this->storeConsulta($request, $paciente);
+    }
+
+    public function showConsultaByQuery(Request $request): View|RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $paciente = $this->resolverPaciente((int) $request->query('paciente', 0));
+        if ($paciente instanceof RedirectResponse) return $paciente;
+        $consultaId = (int) $request->query('consulta', 0);
+        $consulta = HistoriaClinicaConsulta::find($consultaId);
+        if (! $consulta || $consulta->paciente_id !== $paciente->id) {
+            return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+                ->with('error', 'No se encontró esa consulta.');
+        }
+        return $this->showConsulta($paciente, $consulta);
+    }
+
+    public function storeExamenByQuery(Request $request): RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $paciente = $this->resolverPaciente((int) $request->input('paciente_id', 0));
+        if ($paciente instanceof RedirectResponse) return $paciente;
+        return $this->storeExamen($request, $paciente);
+    }
+
+    public function downloadExamenByQuery(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse|RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $examen = PacienteExamen::find((int) $request->query('id', 0));
+        if (! $examen || $examen->paciente->user_id !== Auth::id()) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'No se encontró ese examen.');
+        }
+        return $this->downloadExamen($examen);
+    }
+
+    public function verExamenByQuery(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse|RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $examen = PacienteExamen::find((int) $request->query('id', 0));
+        if (! $examen || $examen->paciente->user_id !== Auth::id()) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'No se encontró ese examen.');
+        }
+        return $this->verExamen($examen);
+    }
+
     /**
      * Genera PDF de la historia clínica del paciente (datos personales, ficha, consultas). No incluye exámenes.
      */

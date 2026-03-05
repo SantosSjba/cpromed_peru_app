@@ -49,10 +49,19 @@ Route::get('ver-nota-venta', [NotaVentaController::class, 'showByQuery'])->name(
 // Eliminar nota por POST a URL de un segmento (evita que en cPanel la sesión no se reconozca en /notas-venta/2)
 Route::post('eliminar-nota-venta', [NotaVentaController::class, 'destroyByQuery'])->name('notas-venta.eliminar');
 
-// Historia clínica por query string (misma lógica que notas de venta: evita 404 en cPanel)
-Route::get('ver-historia-clinica', [HistoriaClinicaController::class, 'showByQuery'])->name('historia-clinica.ver');
-Route::get('descargar-historia-clinica-pdf', [HistoriaClinicaController::class, 'pdfByQuery'])->name('historia-clinica.pdf');
-Route::post('eliminar-historia-clinica', [HistoriaClinicaController::class, 'destroyByQuery'])->name('historia-clinica.eliminar');
+// Historia clínica: todas las rutas fuera de auth con query string (misma lógica que notas de venta)
+// Razón: en este cPanel cualquier URL con segmento dinámico (/historia-clinica/1) devuelve 404.
+Route::get('ver-historia-clinica',         [HistoriaClinicaController::class, 'showByQuery'])->name('historia-clinica.ver');
+Route::get('descargar-historia-clinica-pdf',[HistoriaClinicaController::class, 'pdfByQuery'])->name('historia-clinica.pdf');
+Route::post('eliminar-historia-clinica',    [HistoriaClinicaController::class, 'destroyByQuery'])->name('historia-clinica.eliminar');
+Route::get('editar-historia-clinica',       [HistoriaClinicaController::class, 'editByQuery'])->name('historia-clinica.edit');
+Route::post('actualizar-historia-clinica',  [HistoriaClinicaController::class, 'updateByQuery'])->name('historia-clinica.update');
+Route::get('nueva-consulta',                [HistoriaClinicaController::class, 'createConsultaByQuery'])->name('historia-clinica.consultas.create');
+Route::post('guardar-consulta',             [HistoriaClinicaController::class, 'storeConsultaByQuery'])->name('historia-clinica.consultas.store');
+Route::get('ver-consulta',                  [HistoriaClinicaController::class, 'showConsultaByQuery'])->name('historia-clinica.consultas.show');
+Route::post('guardar-examen',               [HistoriaClinicaController::class, 'storeExamenByQuery'])->name('historia-clinica.examenes.store');
+Route::get('descargar-examen',              [HistoriaClinicaController::class, 'downloadExamenByQuery'])->name('historia-clinica.examenes.download');
+Route::get('ver-examen',                    [HistoriaClinicaController::class, 'verExamenByQuery'])->name('historia-clinica.examenes.ver');
 
 /*
 |--------------------------------------------------------------------------
@@ -125,21 +134,11 @@ Route::middleware('auth')->group(function () {
         return view('pages.ui-elements.videos', ['title' => 'Videos']);
     })->name('videos');
 
-    // Historia clínica (misma estructura que notas de venta: índice en una ruta sin segmentos)
+    // Historia clínica: solo rutas sin segmentos dinámicos (index, crear, guardar)
+    // Las demás están fuera del grupo auth con query string para compatibilidad con cPanel
     Route::get('historia-clinica', [HistoriaClinicaController::class, 'index'])->name('historia-clinica.index');
     Route::get('historia-clinica/crear', [HistoriaClinicaController::class, 'create'])->name('historia-clinica.create');
     Route::post('historia-clinica', [HistoriaClinicaController::class, 'store'])->name('historia-clinica.store');
-    Route::get('historia-clinica/examenes/{examen}/descargar', [HistoriaClinicaController::class, 'downloadExamen'])->name('historia-clinica.examenes.download');
-    Route::get('historia-clinica/examenes/{examen}/ver', [HistoriaClinicaController::class, 'verExamen'])->name('historia-clinica.examenes.ver');
-    Route::get('historia-clinica/{paciente}/pdf', [HistoriaClinicaController::class, 'pdfHistoriaClinica'])->name('historia-clinica.pdf.slug');
-    Route::get('historia-clinica/{paciente}', [HistoriaClinicaController::class, 'show'])->name('historia-clinica.show');
-    Route::get('historia-clinica/{paciente}/editar', [HistoriaClinicaController::class, 'edit'])->name('historia-clinica.edit');
-    Route::put('historia-clinica/{paciente}', [HistoriaClinicaController::class, 'update'])->name('historia-clinica.update');
-    Route::get('historia-clinica/{paciente}/consultas/crear', [HistoriaClinicaController::class, 'createConsulta'])->name('historia-clinica.consultas.create');
-    Route::post('historia-clinica/{paciente}/consultas', [HistoriaClinicaController::class, 'storeConsulta'])->name('historia-clinica.consultas.store');
-    Route::get('historia-clinica/{paciente}/consultas/{consulta}', [HistoriaClinicaController::class, 'showConsulta'])->name('historia-clinica.consultas.show');
-    Route::post('historia-clinica/{paciente}/examenes', [HistoriaClinicaController::class, 'storeExamen'])->name('historia-clinica.examenes.store');
-    Route::delete('historia-clinica/{paciente}', [HistoriaClinicaController::class, 'destroy'])->name('historia-clinica.destroy');
 
     // Cepromed: módulos de negocio (placeholders)
     Route::get('/pacientes', fn () => view('pages.blank', ['title' => 'Pacientes']))->name('pacientes.index');
