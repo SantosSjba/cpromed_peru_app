@@ -1,6 +1,11 @@
+@php
+    $trail = $trail ?? [];
+    $lastItem = collect($trail)->last();
+    $pageTitleSafe = $lastItem['label'] ?? $pageTitle ?? 'Page';
+@endphp
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <h2 class="text-xl font-semibold text-gray-800 dark:text-white/90">
-        {{ end($trail)['label'] }}
+        {{ $pageTitleSafe }}
     </h2>
     <nav aria-label="Breadcrumb">
         <ol class="flex flex-wrap items-center gap-1.5 text-sm">

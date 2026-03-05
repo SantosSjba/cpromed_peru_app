@@ -20,21 +20,21 @@ class PageBreadcrumb extends Component
     public array $items;
 
     /**
-     * Full trail passed to the view (Home + items, or Home + pageTitle).
+     * Full trail passed to the view (Home + items, or Home + pageTitle). Never null.
      */
     public array $trail;
 
     /**
      * Create a new component instance.
      */
-    public function __construct(string $pageTitle = 'Page', array $items = [])
+    public function __construct(?string $pageTitle = 'Page', array $items = [])
     {
-        $this->pageTitle = $pageTitle;
-        $this->items = $items;
+        $this->pageTitle = $pageTitle ?? 'Page';
+        $this->items = is_array($items) ? $items : [];
         $home = [['label' => 'Home', 'url' => url('/')]];
-        $this->trail = count($items) > 0
-            ? array_merge($home, $items)
-            : array_merge($home, [['label' => $pageTitle, 'url' => null]]);
+        $this->trail = count($this->items) > 0
+            ? array_merge($home, $this->items)
+            : array_merge($home, [['label' => $this->pageTitle, 'url' => null]]);
     }
 
     /**
