@@ -77,7 +77,7 @@
                                 <td class="px-5 py-4 text-gray-500 dark:text-gray-400">{{ $p->created_at->format('d/m/Y') }}</td>
                                 <td class="px-5 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ route('historia-clinica.ver', ['id' => $p->id]) }}" class="rounded-lg px-3 py-1.5 text-brand-600 font-medium hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10">
+                                        <a href="{{ route('historia-clinica.show', $p) }}" class="rounded-lg px-3 py-1.5 text-brand-600 font-medium hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10">
                                             Ver
                                         </a>
                                         <a href="{{ route('historia-clinica.edit', $p) }}" class="rounded-lg px-3 py-1.5 text-gray-600 font-medium hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800">

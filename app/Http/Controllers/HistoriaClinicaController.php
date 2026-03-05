@@ -128,7 +128,7 @@ class HistoriaClinicaController extends Controller
             'recomendaciones' => $validated['recomendaciones'] ?? null,
         ]);
 
-        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+        return redirect()->route('historia-clinica.show', $paciente)
             ->with('success', 'Historia clínica registrada correctamente.');
     }
 
@@ -293,7 +293,7 @@ class HistoriaClinicaController extends Controller
             ]);
         }
 
-        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+        return redirect()->route('historia-clinica.show', $paciente)
             ->with('success', 'Historia clínica actualizada correctamente.');
     }
 
@@ -336,7 +336,7 @@ class HistoriaClinicaController extends Controller
             'recomendaciones' => $validated['recomendaciones'] ?? null,
         ]);
 
-        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+        return redirect()->route('historia-clinica.show', $paciente)
             ->with('success', 'Consulta registrada correctamente.');
     }
 
@@ -404,7 +404,7 @@ class HistoriaClinicaController extends Controller
             ? 'Examen subido correctamente.'
             : "{$subidos} exámenes subidos correctamente.";
 
-        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+        return redirect()->route('historia-clinica.show', $paciente)
             ->with('success', $mensaje);
     }
 
