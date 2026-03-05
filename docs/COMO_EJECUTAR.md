@@ -34,6 +34,8 @@ Asegúrate de que la base de datos `factosys_bd_cpromed` exista en MySQL/cPanel 
 php artisan migrate
 ```
 
+Para que fechas y hora usen **Lima, Perú**, en `.env` puedes definir `APP_TIMEZONE=America/Lima` (por defecto el proyecto ya lo usa si no está definido).
+
 Si la BD está en un servidor remoto (cPanel), en `.env` usa:
 
 - `DB_HOST=localhost` si la app corre **en el mismo servidor** que MySQL.

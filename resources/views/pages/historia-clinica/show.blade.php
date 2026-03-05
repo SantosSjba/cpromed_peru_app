@@ -202,57 +202,140 @@
                     Subir examen
                 </button>
             </div>
-            <div id="form-examen" class="hidden border-b border-gray-200 p-6 dark:border-gray-700">
+            <div id="form-examen" class="hidden border-b border-gray-200 p-6 dark:border-gray-700"
+                x-data="examenMultiForm()">
                 <form action="{{ route('historia-clinica.examenes.store', $paciente) }}" method="POST" enctype="multipart/form-data" class="rounded-xl border border-dashed border-gray-300 bg-gray-50/80 p-6 dark:border-gray-600 dark:bg-gray-800/30">
                     @csrf
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Archivo (PDF, imágenes) <span class="text-red-500">*</span></label>
-                            <input type="file" name="archivo" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" class="input-field" required />
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo</label>
-                            <input type="text" name="tipo" value="{{ old('tipo') }}" class="input-field" placeholder="Ej. Laboratorio, Rayos X" />
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha del examen</label>
-                            <input type="date" name="fecha_examen" value="{{ old('fecha_examen') }}" class="input-field" />
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
-                            <input type="text" name="descripcion" value="{{ old('descripcion') }}" class="input-field" />
-                        </div>
+                    <div class="mb-4">
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha del examen (común para todos)</label>
+                        <input type="date" name="fecha_examen" value="{{ old('fecha_examen', now()->timezone('America/Lima')->format('Y-m-d')) }}" class="input-field max-w-xs" />
                     </div>
-                    <button type="submit" class="mt-4 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-600">Subir</button>
+
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">1. Seleccionar archivos</label>
+                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                            <input type="file"
+                                x-ref="fileInput"
+                                name="archivo[]"
+                                accept=".pdf,.jpg,.jpeg,.png,.gif,.webp"
+                                multiple
+                                @change="onFilesSelected($event)"
+                                class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-xl file:border-0 file:bg-brand-500 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white file:hover:bg-brand-600 dark:text-gray-400 dark:file:bg-brand-600 dark:file:hover:bg-brand-500" />
+                            <span class="text-sm text-gray-500 dark:text-gray-400" x-show="rows.length > 0" x-text="rows.length + ' archivo(s) seleccionado(s)'"></span>
+                        </div>
+                        <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">PDF o imágenes. Puede elegir varios a la vez.</p>
+                    </div>
+
+                    <div x-show="rows.length > 0" class="mb-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-800/50">
+                        <h4 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white">2. Complete Tipo y Descripción / Laboratorio por cada archivo</h4>
+                        <ul class="space-y-3" role="list">
+                            <template x-for="(row, index) in rows" :key="index">
+                                <li class="flex flex-col gap-2 rounded-lg border border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700 dark:bg-gray-800/80 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                                    <div class="flex min-w-0 flex-1 items-center gap-2 sm:min-w-[180px]">
+                                        <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold text-brand-600 dark:bg-brand-500/20 dark:text-brand-400" x-text="index + 1"></span>
+                                        <span class="truncate text-sm font-medium text-gray-800 dark:text-gray-200" :title="row.fileName" x-text="row.fileName"></span>
+                                    </div>
+                                    <div class="flex flex-1 flex-wrap gap-3 sm:flex-nowrap">
+                                        <div class="min-w-0 flex-1 sm:max-w-[180px]">
+                                            <label class="mb-0.5 block text-xs font-medium text-gray-500 dark:text-gray-400">Tipo</label>
+                                            <input type="text"
+                                                :name="'tipo[' + index + ']'"
+                                                x-model="row.tipo"
+                                                class="input-field"
+                                                placeholder="Ej. Laboratorio, Rayos X" />
+                                        </div>
+                                        <div class="min-w-0 flex-[2] sm:max-w-[280px]">
+                                            <label class="mb-0.5 block text-xs font-medium text-gray-500 dark:text-gray-400">Descripción / Laboratorio</label>
+                                            <input type="text"
+                                                :name="'descripcion[' + index + ']'"
+                                                x-model="row.descripcion"
+                                                class="input-field"
+                                                placeholder="Ej. Hemograma, Perfil lipídico" />
+                                        </div>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Los datos se guardan en el mismo orden que la lista. Puede cambiar la selección de archivos arriba para actualizar la lista.</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3" x-show="rows.length > 0">
+                        <button type="submit" class="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600">
+                            Subir exámenes
+                        </button>
+                        <button type="button" @click="clearFiles()" class="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
+                            Cambiar archivos
+                        </button>
+                    </div>
                 </form>
+                <script>
+                    function examenMultiForm() {
+                        return {
+                            rows: [],
+                            fileInput: null,
+                            onFilesSelected(event) {
+                                const files = event.target.files;
+                                if (!files || files.length === 0) {
+                                    this.rows = [];
+                                    return;
+                                }
+                                this.rows = Array.from(files).map(function(f) {
+                                    return { fileName: f.name, tipo: '', descripcion: '' };
+                                });
+                            },
+                            clearFiles() {
+                                this.rows = [];
+                                var input = this.$refs.fileInput;
+                                if (input) {
+                                    input.value = '';
+                                }
+                            }
+                        };
+                    }
+                </script>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-800/80">
-                            <th class="px-5 py-3 font-semibold text-gray-700 dark:text-gray-200">Archivo</th>
-                            <th class="px-5 py-3 font-semibold text-gray-700 dark:text-gray-200">Tipo</th>
-                            <th class="px-5 py-3 font-semibold text-gray-700 dark:text-gray-200">Fecha</th>
-                            <th class="px-5 py-3 text-right font-semibold text-gray-700 dark:text-gray-200">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                        @forelse($paciente->pacienteExamenes as $e)
-                            <tr class="transition hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
-                                <td class="px-5 py-3 font-medium text-gray-900 dark:text-white">{{ $e->file_name }}</td>
-                                <td class="px-5 py-3 text-gray-700 dark:text-gray-300">{{ $e->tipo ?? '—' }}</td>
-                                <td class="px-5 py-3 text-gray-700 dark:text-gray-300">{{ $e->fecha_examen?->format('d/m/Y') ?? '—' }}</td>
-                                <td class="px-5 py-3 text-right">
-                                    <a href="{{ route('historia-clinica.examenes.download', $e) }}" class="font-medium text-brand-600 hover:underline dark:text-brand-400">Descargar</a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-5 py-8 text-center text-gray-500 dark:text-gray-400">No hay exámenes subidos.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div class="p-6">
+                @if(isset($examenesPorFecha) && $examenesPorFecha->isNotEmpty())
+                    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">Exámenes agrupados por fecha de realización (o fecha de subida si no se indicó fecha). Así se puede ver la evolución en el tiempo.</p>
+                    @foreach($examenesPorFecha as $grupo)
+                        <div class="mb-6 last:mb-0">
+                            <h3 class="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                Exámenes del {{ $grupo['fecha']->format('d/m/Y') }}
+                            </h3>
+                            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+                                <table class="w-full text-left text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-200 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-800/80">
+                                            <th class="px-4 py-2.5 font-semibold text-gray-700 dark:text-gray-200">Archivo</th>
+                                            <th class="px-4 py-2.5 font-semibold text-gray-700 dark:text-gray-200">Tipo</th>
+                                            <th class="px-4 py-2.5 font-semibold text-gray-700 dark:text-gray-200">Descripción</th>
+                                            <th class="px-4 py-2.5 text-right font-semibold text-gray-700 dark:text-gray-200">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                        @foreach($grupo['items'] as $e)
+                                            @php $esPdf = strtolower(pathinfo($e->file_name, PATHINFO_EXTENSION)) === 'pdf'; @endphp
+                                            <tr class="transition hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
+                                                <td class="px-4 py-2.5 font-medium text-gray-900 dark:text-white">{{ $e->file_name }}</td>
+                                                <td class="px-4 py-2.5 text-gray-700 dark:text-gray-300">{{ $e->tipo ?? '—' }}</td>
+                                                <td class="px-4 py-2.5 text-gray-600 dark:text-gray-400">{{ $e->descripcion ?? '—' }}</td>
+                                                <td class="px-4 py-2.5 text-right">
+                                                    @if($esPdf)
+                                                        <a href="{{ route('historia-clinica.examenes.ver', $e) }}" target="_blank" rel="noopener noreferrer" class="font-medium text-brand-600 hover:underline dark:text-brand-400 mr-3">Ver</a>
+                                                    @endif
+                                                    <a href="{{ route('historia-clinica.examenes.download', $e) }}" class="font-medium text-brand-600 hover:underline dark:text-brand-400">Descargar</a>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <p class="py-8 text-center text-gray-500 dark:text-gray-400">No hay exámenes subidos. Use «Subir examen» y, si puede, indique la fecha del examen para organizarlos por día.</p>
+                @endif
             </div>
         </div>
     </div>

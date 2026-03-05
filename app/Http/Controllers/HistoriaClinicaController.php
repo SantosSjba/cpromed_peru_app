@@ -14,16 +14,25 @@ use Illuminate\Support\Facades\Storage;
 
 class HistoriaClinicaController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $pacientes = Paciente::where('user_id', Auth::id())
-            ->with('historiaClinicaFicha')
-            ->orderByDesc('created_at')
-            ->paginate(15);
+        $query = Paciente::where('user_id', Auth::id())->with('historiaClinicaFicha');
+
+        if ($request->filled('buscar')) {
+            $term = $request->input('buscar');
+            $query->where(function ($q) use ($term) {
+                $q->where('nombres', 'like', "%{$term}%")
+                    ->orWhere('apellidos', 'like', "%{$term}%")
+                    ->orWhere('dni', 'like', "%{$term}%");
+            });
+        }
+
+        $pacientes = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
 
         return view('pages.historia-clinica.index', [
             'title' => 'Historia clínica',
             'pacientes' => $pacientes,
+            'buscar' => $request->input('buscar', ''),
         ]);
     }
 
@@ -115,10 +124,29 @@ class HistoriaClinicaController extends Controller
         if ($paciente->user_id !== Auth::id()) {
             abort(404);
         }
-        $paciente->load(['historiaClinicaFicha', 'historiaClinicaConsultas' => fn ($q) => $q->orderByDesc('fecha_consulta')], 'pacienteExamenes');
+        $paciente->load(['historiaClinicaFicha', 'historiaClinicaConsultas' => fn ($q) => $q->orderByDesc('fecha_consulta')]);
+        $paciente->load(['pacienteExamenes' => fn ($q) => $q->orderByRaw('COALESCE(fecha_examen, created_at) DESC')]);
+
+        $examenesPorFecha = $paciente->pacienteExamenes
+            ->groupBy(function ($e) {
+                return $e->fecha_examen
+                    ? $e->fecha_examen->format('Y-m-d')
+                    : $e->created_at->format('Y-m-d');
+            })
+            ->map(function ($examenes, $fecha) {
+                $primero = $examenes->first();
+                $fechaObj = $primero->fecha_examen ?? $primero->created_at;
+                return [
+                    'fecha' => $fechaObj,
+                    'items' => $examenes,
+                ];
+            })
+            ->sortByDesc(fn ($g) => $g['fecha']);
+
         return view('pages.historia-clinica.show', [
             'title' => 'Historia clínica - ' . $paciente->nombre_completo,
             'paciente' => $paciente,
+            'examenesPorFecha' => $examenesPorFecha,
         ]);
     }
 
@@ -266,31 +294,55 @@ class HistoriaClinicaController extends Controller
         if ($paciente->user_id !== Auth::id()) {
             abort(404);
         }
-        $validated = $request->validate([
-            'archivo' => ['required', 'file', 'max:20480', 'mimes:pdf,jpg,jpeg,png,gif,webp'],
-            'tipo' => ['nullable', 'string', 'max:64'],
+        $request->validate([
+            'archivo' => ['required', 'array', 'min:1'],
+            'archivo.*' => ['nullable', 'file', 'max:20480', 'mimes:pdf,jpg,jpeg,png,gif,webp'],
+            'tipo' => ['nullable', 'array'],
+            'tipo.*' => ['nullable', 'string', 'max:64'],
+            'descripcion' => ['nullable', 'array'],
+            'descripcion.*' => ['nullable', 'string', 'max:500'],
             'fecha_examen' => ['nullable', 'date'],
-            'descripcion' => ['nullable', 'string', 'max:500'],
         ], [], [
-            'archivo' => 'archivo del examen',
+            'archivo' => 'archivos',
+            'archivo.*' => 'archivo',
         ]);
 
-        $file = $request->file('archivo');
+        $archivos = $request->file('archivo', []);
+        $tipos = $request->input('tipo', []);
+        $descripciones = $request->input('descripcion', []);
+        $fechaExamen = $request->input('fecha_examen');
         $dir = 'paciente_examenes/' . $paciente->id;
-        $path = $file->store($dir, 'local');
+        $subidos = 0;
 
-        PacienteExamen::create([
-            'paciente_id' => $paciente->id,
-            'user_id' => Auth::id(),
-            'path' => $path,
-            'file_name' => $file->getClientOriginalName(),
-            'tipo' => $validated['tipo'] ?? null,
-            'fecha_examen' => $validated['fecha_examen'] ?? null,
-            'descripcion' => $validated['descripcion'] ?? null,
-        ]);
+        foreach ($archivos as $i => $file) {
+            if (! $file || ! $file->isValid()) {
+                continue;
+            }
+            $path = $file->store($dir, 'local');
+            PacienteExamen::create([
+                'paciente_id' => $paciente->id,
+                'user_id' => Auth::id(),
+                'path' => $path,
+                'file_name' => $file->getClientOriginalName(),
+                'tipo' => $tipos[$i] ?? null,
+                'fecha_examen' => $fechaExamen,
+                'descripcion' => $descripciones[$i] ?? null,
+            ]);
+            $subidos++;
+        }
+
+        if ($subidos === 0) {
+            return redirect()->back()
+                ->with('error', 'Debe subir al menos un archivo válido (PDF o imagen).')
+                ->withInput();
+        }
+
+        $mensaje = $subidos === 1
+            ? 'Examen subido correctamente.'
+            : "{$subidos} exámenes subidos correctamente.";
 
         return redirect()->route('historia-clinica.show', $paciente)
-            ->with('success', 'Examen subido correctamente.');
+            ->with('success', $mensaje);
     }
 
     public function downloadExamen(PacienteExamen $examen): \Symfony\Component\HttpFoundation\StreamedResponse|RedirectResponse
@@ -305,6 +357,25 @@ class HistoriaClinicaController extends Controller
             $examen->path,
             $examen->file_name,
             ['Content-Type' => Storage::disk('local')->mimeType($examen->path)]
+        );
+    }
+
+    public function verExamen(PacienteExamen $examen): \Symfony\Component\HttpFoundation\StreamedResponse|RedirectResponse
+    {
+        if ($examen->paciente->user_id !== Auth::id()) {
+            abort(404);
+        }
+        if (! Storage::disk('local')->exists($examen->path)) {
+            return redirect()->back()->with('error', 'El archivo no existe.');
+        }
+        $mime = Storage::disk('local')->mimeType($examen->path);
+        return Storage::disk('local')->response(
+            $examen->path,
+            $examen->file_name,
+            [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline',
+            ]
         );
     }
 
