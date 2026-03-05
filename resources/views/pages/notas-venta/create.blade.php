@@ -2,179 +2,208 @@
 
 @section('content')
     <x-common.page-breadcrumb :pageTitle="$title" />
-    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6"
-        x-data="notaVentaForm()">
-        @if($errors->any())
-            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $err)
-                        <li>{{ $err }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    <div class="space-y-6">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-white/[0.02] lg:p-6"
+            x-data="notaVentaForm({{ json_encode($clienteInit, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) }})">
+            @if($errors->any())
+                <div class="mb-4 rounded-xl border border-red-200 bg-red-50/80 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+                    <ul class="list-disc list-inside">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-        <form method="POST" action="{{ route('notas-venta.store') }}" id="form-nota-venta">
-            @csrf
-            <input type="hidden" name="generar_pdf" value="0" id="generar_pdf" />
+            <form method="POST" action="{{ route('notas-venta.store') }}" id="form-nota-venta">
+                @csrf
+                <input type="hidden" name="generar_pdf" value="0" id="generar_pdf" />
 
-            <div class="mb-6">
-                <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Datos del negocio</h4>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">RUC</label>
-                        <input type="text" name="ruc" value="{{ old('ruc', '10477674327') }}" class="input-field" />
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Razón social</label>
-                        <input type="text" name="razon_social" value="{{ old('razon_social', 'CPROMED PERU') }}" class="input-field" />
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Dirección</label>
-                        <input type="text" name="direccion" value="{{ old('direccion') }}" class="input-field" />
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Sucursal</label>
-                        <input type="text" name="sucursal" value="{{ old('sucursal') }}" class="input-field" />
+                <div class="mb-6">
+                    <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Datos del negocio</h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">RUC</label>
+                            <input type="text" name="ruc" value="{{ old('ruc', '10477674327') }}" class="input-field" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Razón social</label>
+                            <input type="text" name="razon_social" value="{{ old('razon_social', 'CPROMED PERU') }}" class="input-field" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
+                            <input type="text" name="direccion" value="{{ old('direccion') }}" class="input-field" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Sucursal</label>
+                            <input type="text" name="sucursal" value="{{ old('sucursal') }}" class="input-field" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="mb-6">
-                <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Datos de la boleta</h4>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Nº Correlativo</label>
-                        <input type="text" name="boleta_numero" x-model="boletaNumero" class="input-field" required />
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Fecha emisión</label>
-                        <input type="date" name="boleta_fecha_emision" x-model="fechaEmision" class="input-field" required />
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Fecha vencimiento</label>
-                        <input type="date" name="boleta_fecha_vencimiento" value="{{ old('boleta_fecha_vencimiento') }}" class="input-field" />
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Moneda</label>
-                        <select name="boleta_moneda" class="input-field">
-                            <option value="Soles" {{ old('boleta_moneda', 'Soles') == 'Soles' ? 'selected' : '' }}>Soles</option>
-                            <option value="Dólares" {{ old('boleta_moneda') == 'Dólares' ? 'selected' : '' }}>Dólares</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Forma de pago</label>
-                        <input type="text" name="boleta_forma_pago" value="{{ old('boleta_forma_pago', 'Contado') }}" class="input-field" />
+                <div class="mb-6">
+                    <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Datos de la boleta</h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Nº Correlativo</label>
+                            <input type="text" name="boleta_numero" x-model="boletaNumero" class="input-field" required />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha emisión</label>
+                            <input type="date" name="boleta_fecha_emision" x-model="fechaEmision" class="input-field" required />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha vencimiento</label>
+                            <input type="date" name="boleta_fecha_vencimiento" value="{{ old('boleta_fecha_vencimiento') }}" class="input-field" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Moneda</label>
+                            <select name="boleta_moneda" class="input-field">
+                                <option value="Soles" {{ old('boleta_moneda', 'Soles') == 'Soles' ? 'selected' : '' }}>Soles</option>
+                                <option value="Dólares" {{ old('boleta_moneda') == 'Dólares' ? 'selected' : '' }}>Dólares</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Forma de pago</label>
+                            <input type="text" name="boleta_forma_pago" value="{{ old('boleta_forma_pago', 'Contado') }}" class="input-field" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="mb-6">
-                <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Datos del cliente</h4>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Nombre <span class="text-red-500">*</span></label>
-                        <input type="text" name="cliente_nombre" value="{{ old('cliente_nombre') }}" class="input-field" required />
+                <div class="mb-6">
+                    <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Datos del cliente</h4>
+                    <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">Ingrese el DNI o RUC; si el cliente está en el sistema se completarán nombre y dirección. Si no existe, se registrará como nuevo al guardar la nota.</p>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">DNI / RUC <span class="text-red-500">*</span></label>
+                            <input type="text"
+                                name="cliente_dni_ruc"
+                                x-model="clienteDniRuc"
+                                @blur="buscarClientePorDni()"
+                                placeholder="Ej. 12345678"
+                                class="input-field"
+                                required />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre completo <span class="text-red-500">*</span></label>
+                            <input type="text"
+                                name="cliente_nombre"
+                                x-model="clienteNombre"
+                                placeholder="Nombres y apellidos"
+                                class="input-field"
+                                required />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
+                            <input type="text"
+                                name="cliente_direccion"
+                                x-model="clienteDireccion"
+                                placeholder="Dirección del cliente"
+                                class="input-field" />
+                        </div>
                     </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">DNI/RUC <span class="text-red-500">*</span></label>
-                        <input type="text" name="cliente_dni_ruc" value="{{ old('cliente_dni_ruc') }}" class="input-field" required />
+                    <div class="mt-2 text-sm" x-show="clienteEstado === 'loading'" x-cloak>
+                        <span class="text-gray-500 dark:text-gray-400">Buscando cliente…</span>
                     </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Dirección</label>
-                        <input type="text" name="cliente_direccion" value="{{ old('cliente_direccion') }}" class="input-field" />
+                    <div class="mt-2 text-sm" x-show="clienteEstado === 'found'" x-cloak>
+                        <span class="text-green-600 dark:text-green-400">Cliente encontrado. Puede editar los datos si lo desea.</span>
+                    </div>
+                    <div class="mt-2 text-sm" x-show="clienteEstado === 'new'" x-cloak>
+                        <span class="text-gray-500 dark:text-gray-400">No registrado. Se registrará como nuevo cliente al guardar la nota.</span>
                     </div>
                 </div>
-            </div>
 
-            <div class="mb-6">
-                <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Detalles</h4>
-                <div class="overflow-x-auto">
-                    <table class="w-full min-w-[700px] text-sm">
-                        <thead class="bg-gray-100 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-3 py-2 text-left font-medium">Descripción</th>
-                                <th class="px-3 py-2 text-left font-medium w-24">Cantidad</th>
-                                <th class="px-3 py-2 text-left font-medium w-28">P. unitario</th>
-                                <th class="px-3 py-2 text-left font-medium w-24">Dscto.</th>
-                                <th class="px-3 py-2 text-left font-medium w-28">Importe</th>
-                                <th class="px-3 py-2 w-20"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700" id="detalles-tbody">
-                            <template x-for="(detalle, index) in detalles" :key="index">
+                <div class="mb-6">
+                    <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Detalles</h4>
+                    <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+                        <table class="w-full min-w-[700px] text-sm">
+                            <thead class="border-b border-gray-200 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-800/80">
                                 <tr>
-                                    <td class="px-3 py-2">
-                                        <input type="text" :name="'detalles[' + index + '][descripcion]'" x-model="detalle.descripcion" class="input-field w-full" required />
-                                    </td>
-                                    <td class="px-3 py-2">
-                                        <input type="number" step="0.01" :name="'detalles[' + index + '][cantidad]'" x-model.number="detalle.cantidad" @input="calcularImporte(index)" class="input-field w-full" />
-                                    </td>
-                                    <td class="px-3 py-2">
-                                        <input type="number" step="0.01" :name="'detalles[' + index + '][precio_unitario]'" x-model.number="detalle.precio_unitario" @input="calcularImporte(index)" class="input-field w-full" />
-                                    </td>
-                                    <td class="px-3 py-2">
-                                        <input type="number" step="0.01" :name="'detalles[' + index + '][descuento_unitario]'" x-model.number="detalle.descuento_unitario" @input="calcularImporte(index)" class="input-field w-full" />
-                                    </td>
-                                    <td class="px-3 py-2">
-                                        <input type="hidden" :name="'detalles[' + index + '][importe_total_unitario]'" :value="detalle.importe_total_unitario" />
-                                        <span x-text="detalle.importe_total_unitario.toFixed(2)"></span>
-                                    </td>
-                                    <td class="px-3 py-2">
-                                        <button type="button" @click="eliminarDetalle(index)" class="text-red-600 hover:underline text-sm">Quitar</button>
-                                    </td>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Descripción</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200 w-28">Cantidad</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200 w-28">P. unitario</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200 w-24">Dscto.</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200 w-28">Importe</th>
+                                    <th class="px-4 py-3 w-20"></th>
                                 </tr>
-                            </template>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                <template x-for="(detalle, index) in detalles" :key="index">
+                                    <tr>
+                                        <td class="px-4 py-2">
+                                            <input type="text" :name="'detalles[' + index + '][descripcion]'" x-model="detalle.descripcion" class="input-field w-full" required />
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            <input type="number" step="0.01" :name="'detalles[' + index + '][cantidad]'" x-model.number="detalle.cantidad" @input="calcularImporte(index)" class="input-field w-full" />
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            <input type="number" step="0.01" :name="'detalles[' + index + '][precio_unitario]'" x-model.number="detalle.precio_unitario" @input="calcularImporte(index)" class="input-field w-full" />
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            <input type="number" step="0.01" :name="'detalles[' + index + '][descuento_unitario]'" x-model.number="detalle.descuento_unitario" @input="calcularImporte(index)" class="input-field w-full" />
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            <input type="hidden" :name="'detalles[' + index + '][importe_total_unitario]'" :value="detalle.importe_total_unitario" />
+                                            <span class="font-medium" x-text="detalle.importe_total_unitario.toFixed(2)"></span>
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            <button type="button" @click="eliminarDetalle(index)" class="rounded-lg px-2 py-1 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10">Quitar</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" @click="agregarDetalle()" class="mt-3 inline-flex items-center gap-2 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Agregar detalle
+                    </button>
                 </div>
-                <button type="button" @click="agregarDetalle()" class="mt-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300">
-                    + Agregar detalle
-                </button>
-            </div>
 
-            <div class="mb-6">
-                <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Totales</h4>
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Descuento total</label>
-                        <input type="number" step="0.01" name="descuento_total" x-model.number="descuentoTotal" @input="calcularTotales()" class="input-field" />
+                <div class="mb-6">
+                    <h4 class="mb-3 text-base font-semibold text-gray-900 dark:text-white">Totales</h4>
+                    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Descuento total</label>
+                            <input type="number" step="0.01" name="descuento_total" x-model.number="descuentoTotal" @input="calcularTotales()" class="input-field" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Subtotal</label>
+                            <input type="number" step="0.01" name="subtotal" x-model="subtotal" readonly class="input-field" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">IGV</label>
+                            <input type="number" step="0.01" name="igv" x-model="igv" readonly class="input-field" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Total</label>
+                            <input type="number" step="0.01" name="total" x-model="total" readonly class="input-field font-semibold" required />
+                        </div>
                     </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Subtotal</label>
-                        <input type="number" step="0.01" name="subtotal" x-model="subtotal" readonly class="input-field" />
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">IGV</label>
-                        <input type="number" step="0.01" name="igv" x-model="igv" readonly class="input-field" />
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Total</label>
-                        <input type="number" step="0.01" name="total" x-model="total" readonly class="input-field" required />
+                    <div class="mt-4">
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Notas</label>
+                        <textarea name="notas" rows="2" class="input-field w-full" placeholder="Observaciones opcionales">{{ old('notas') }}</textarea>
                     </div>
                 </div>
-                <div class="mt-2">
-                    <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Notas</label>
-                    <textarea name="notas" rows="2" class="input-field w-full">{{ old('notas') }}</textarea>
-                </div>
-            </div>
 
-            <div class="flex flex-wrap gap-3">
-                <button type="submit" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">
-                    Guardar
-                </button>
-                <button type="button" @click="submitConPdf()" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    Guardar y descargar PDF
-                </button>
-                <a href="{{ route('notas-venta.index') }}" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300">
-                    Cancelar
-                </a>
-            </div>
-        </form>
+                <div class="flex flex-wrap gap-3">
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:bg-brand-600">
+                        Guardar
+                    </button>
+                    <button type="button" @click="submitConPdf()" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Guardar y descargar PDF
+                    </button>
+                    <a href="{{ route('notas-venta.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
-        function notaVentaForm() {
+        function notaVentaForm(init) {
+            init = init || {};
             const ahora = new Date();
             const pad = (n) => String(n).padStart(2, '0');
             const numero = ahora.getFullYear().toString().slice(-2) + pad(ahora.getMonth()+1) + pad(ahora.getDate()) + '-' + pad(ahora.getHours()) + pad(ahora.getMinutes()) + pad(ahora.getSeconds());
@@ -182,11 +211,37 @@
             return {
                 boletaNumero: numero,
                 fechaEmision: ahora.toISOString().split('T')[0],
+                clienteNombre: init.clienteNombre || '',
+                clienteDniRuc: init.clienteDniRuc || '',
+                clienteDireccion: init.clienteDireccion || '',
+                clienteEstado: '', // '', 'loading', 'found', 'new'
                 detalles: [{ descripcion: '', cantidad: 0, precio_unitario: 0, descuento_unitario: 0, importe_total_unitario: 0 }],
                 descuentoTotal: 0,
                 subtotal: 0,
                 igv: 0,
                 total: 0,
+                async buscarClientePorDni() {
+                    const dni = (this.clienteDniRuc || '').trim();
+                    if (!dni) {
+                        this.clienteEstado = '';
+                        return;
+                    }
+                    this.clienteEstado = 'loading';
+                    try {
+                        const url = '{{ route("notas-venta.cliente-por-dni") }}?dni=' + encodeURIComponent(dni);
+                        const res = await fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+                        const data = await res.json().catch(() => ({}));
+                        if (res.ok && data.found) {
+                            this.clienteNombre = data.nombre || this.clienteNombre;
+                            this.clienteDireccion = data.direccion || '';
+                            this.clienteEstado = 'found';
+                        } else {
+                            this.clienteEstado = 'new';
+                        }
+                    } catch (e) {
+                        this.clienteEstado = 'new';
+                    }
+                },
                 agregarDetalle() {
                     this.detalles.push({ descripcion: '', cantidad: 0, precio_unitario: 0, descuento_unitario: 0, importe_total_unitario: 0 });
                 },

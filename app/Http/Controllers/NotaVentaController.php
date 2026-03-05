@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\NotaVenta;
+use App\Models\Paciente;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -12,21 +13,65 @@ use Symfony\Component\HttpFoundation\Response;
 
 class NotaVentaController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $notas = NotaVenta::where('user_id', Auth::id())
-            ->orderByDesc('created_at')
-            ->paginate(15);
+        $buscar = $request->query('buscar', '');
+        $query = NotaVenta::where('user_id', Auth::id());
+
+        if (trim($buscar) !== '') {
+            $term = '%' . trim($buscar) . '%';
+            $query->where(function ($q) use ($term) {
+                $q->where('numero_documento', 'like', $term)
+                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(cliente, '$.nombre')) LIKE ?", [$term])
+                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(cliente, '$.dni_ruc')) LIKE ?", [$term]);
+            });
+        }
+
+        $notas = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
 
         return view('pages.notas-venta.index', [
             'title' => 'Notas de venta',
             'notas' => $notas,
+            'buscar' => $buscar,
         ]);
     }
 
     public function create(): View
     {
-        return view('pages.notas-venta.create', ['title' => 'Nueva nota de venta']);
+        $clienteInit = [
+            'clienteNombre' => old('cliente_nombre', ''),
+            'clienteDniRuc' => old('cliente_dni_ruc', ''),
+            'clienteDireccion' => old('cliente_direccion', ''),
+        ];
+        return view('pages.notas-venta.create', [
+            'title' => 'Nueva nota de venta',
+            'clienteInit' => $clienteInit,
+        ]);
+    }
+
+    /**
+     * Buscar cliente (paciente) por DNI para autocompletar en nueva nota de venta.
+     * Devuelve JSON con nombre, dni_ruc, direccion o 404.
+     */
+    public function clientePorDni(Request $request)
+    {
+        $dni = $request->query('dni');
+        if ($dni === null || trim((string) $dni) === '') {
+            return response()->json(['error' => 'DNI requerido'], 400);
+        }
+        $dni = trim($dni);
+        $paciente = Paciente::where('user_id', Auth::id())
+            ->where('dni', $dni)
+            ->first();
+        if (! $paciente) {
+            return response()->json(['found' => false], 404);
+        }
+        return response()->json([
+            'found' => true,
+            'nombre' => $paciente->nombre_completo,
+            'dni_ruc' => $paciente->dni ?? $dni,
+            'direccion' => $paciente->direccion ?? '',
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -73,6 +118,27 @@ class NotaVentaController extends Controller
             ];
         }
 
+        $clienteDni = trim($validated['cliente_dni_ruc']);
+        $clienteNombre = trim($validated['cliente_nombre']);
+        $clienteDireccion = $validated['cliente_direccion'] ?? '';
+
+        // Si el DNI no existe en pacientes (clientes), registrar como nuevo cliente al crear la nota
+        $paciente = Paciente::where('user_id', Auth::id())->where('dni', $clienteDni)->first();
+        if (! $paciente) {
+            $partes = preg_split('/\s+/u', $clienteNombre, 2, PREG_SPLIT_NO_EMPTY);
+            $nombres = $partes[0] ?? $clienteNombre;
+            $apellidos = $partes[1] ?? '';
+            Paciente::create([
+                'user_id' => Auth::id(),
+                'nombres' => $nombres,
+                'apellidos' => $apellidos,
+                'dni' => $clienteDni,
+                'direccion' => $clienteDireccion,
+                'fecha_nacimiento' => now()->subYears(30)->format('Y-m-d'), // por defecto para completar después
+                'genero' => 'No especificado',
+            ]);
+        }
+
         $nota = NotaVenta::create([
             'user_id' => Auth::id(),
             'numero_documento' => $validated['boleta_numero'],
@@ -81,9 +147,9 @@ class NotaVentaController extends Controller
             'direccion' => $validated['direccion'] ?? null,
             'sucursal' => $validated['sucursal'] ?? null,
             'cliente' => [
-                'nombre' => $validated['cliente_nombre'],
-                'dni_ruc' => $validated['cliente_dni_ruc'],
-                'direccion' => $validated['cliente_direccion'] ?? '',
+                'nombre' => $clienteNombre,
+                'dni_ruc' => $clienteDni,
+                'direccion' => $clienteDireccion,
             ],
             'boleta' => [
                 'numero' => $validated['boleta_numero'],

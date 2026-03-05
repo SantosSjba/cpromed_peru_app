@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     })->name('profile');
 
     // Notas de venta (migrado desde admintopico)
+    Route::get('notas-venta/cliente-por-dni', [NotaVentaController::class, 'clientePorDni'])->name('notas-venta.cliente-por-dni');
     Route::get('notas-venta/pdf/{id}', [NotaVentaController::class, 'pdfById'])->name('notas-venta.pdf.id');
     Route::get('notas-venta/{notaVenta}/pdf', [NotaVentaController::class, 'pdf'])->name('notas-venta.pdf.slug');
     Route::resource('notas-venta', NotaVentaController::class)->only(['index', 'create', 'store', 'show', 'destroy'])->parameters(['notas-venta' => 'notaVenta']);
