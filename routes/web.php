@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotaVentaController;
+use App\Http\Controllers\HistoriaClinicaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -117,6 +118,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/videos', function () {
         return view('pages.ui-elements.videos', ['title' => 'Videos']);
     })->name('videos');
+
+    // Historia clínica
+    Route::get('/historia-clinica', [HistoriaClinicaController::class, 'index'])->name('historia-clinica.index');
+    Route::get('/historia-clinica/crear', [HistoriaClinicaController::class, 'create'])->name('historia-clinica.create');
+    Route::post('/historia-clinica', [HistoriaClinicaController::class, 'store'])->name('historia-clinica.store');
+    Route::get('/historia-clinica/examenes/{examen}/descargar', [HistoriaClinicaController::class, 'downloadExamen'])->name('historia-clinica.examenes.download');
+    Route::get('/historia-clinica/{paciente}', [HistoriaClinicaController::class, 'show'])->name('historia-clinica.show');
+    Route::get('/historia-clinica/{paciente}/editar', [HistoriaClinicaController::class, 'edit'])->name('historia-clinica.edit');
+    Route::put('/historia-clinica/{paciente}', [HistoriaClinicaController::class, 'update'])->name('historia-clinica.update');
+    Route::get('/historia-clinica/{paciente}/consultas/crear', [HistoriaClinicaController::class, 'createConsulta'])->name('historia-clinica.consultas.create');
+    Route::post('/historia-clinica/{paciente}/consultas', [HistoriaClinicaController::class, 'storeConsulta'])->name('historia-clinica.consultas.store');
+    Route::get('/historia-clinica/{paciente}/consultas/{consulta}', [HistoriaClinicaController::class, 'showConsulta'])->name('historia-clinica.consultas.show');
+    Route::post('/historia-clinica/{paciente}/examenes', [HistoriaClinicaController::class, 'storeExamen'])->name('historia-clinica.examenes.store');
+    Route::delete('/historia-clinica/{paciente}', [HistoriaClinicaController::class, 'destroy'])->name('historia-clinica.destroy');
 
     // Cepromed: módulos de negocio (placeholders)
     Route::get('/pacientes', fn () => view('pages.blank', ['title' => 'Pacientes']))->name('pacientes.index');

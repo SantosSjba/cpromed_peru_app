@@ -106,6 +106,8 @@ composer run dev:win
 
 Abre **http://localhost:8000**. Si no hay sesión, te redirigirá a **Iniciar sesión**; puedes **Registrarse** y luego entrar al dashboard.
 
+Desde el menú puedes acceder a **Notas de venta** y **Historia clínica** (pacientes, fichas, consultas y exámenes). Los archivos de exámenes se guardan en `storage/app/paciente_examenes/` (disco local). En producción asegura que la carpeta `storage/app` tenga permisos de escritura.
+
 ---
 
 ## Despliegue en cPanel (PDF y rutas)

@@ -17,6 +17,11 @@ class MenuHelper
                 'name' => 'Notas de venta',
                 'path' => '/notas-venta',
             ],
+            [
+                'icon' => 'forms',
+                'name' => 'Historia clínica',
+                'path' => '/historia-clinica',
+            ],
         ];
     }
 
