@@ -330,7 +330,12 @@
                                                     @if($esPdf)
                                                         <a href="{{ route('historia-clinica.examenes.ver', ['id' => $e->id]) }}" target="_blank" rel="noopener noreferrer" class="font-medium text-brand-600 hover:underline dark:text-brand-400 mr-3">Ver</a>
                                                     @endif
-                                                    <a href="{{ route('historia-clinica.examenes.download', ['id' => $e->id]) }}" class="font-medium text-brand-600 hover:underline dark:text-brand-400">Descargar</a>
+                                                    <a href="{{ route('historia-clinica.examenes.download', ['id' => $e->id]) }}" class="font-medium text-brand-600 hover:underline dark:text-brand-400 mr-3">Descargar</a>
+                                                    <form action="{{ route('historia-clinica.examenes.destroy') }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar este examen? Se borrará el archivo. Esta acción no se puede deshacer.');">
+                                                        @csrf
+                                                        <input type="hidden" name="id" value="{{ $e->id }}">
+                                                        <button type="submit" class="font-medium text-red-600 hover:underline dark:text-red-400">Eliminar</button>
+                                                    </form>
                                                 </td>
                                             </tr>
                                         @endforeach

@@ -59,9 +59,13 @@ Route::post('actualizar-historia-clinica',  [HistoriaClinicaController::class, '
 Route::get('nueva-consulta',                [HistoriaClinicaController::class, 'createConsultaByQuery'])->name('historia-clinica.consultas.create');
 Route::post('guardar-consulta',             [HistoriaClinicaController::class, 'storeConsultaByQuery'])->name('historia-clinica.consultas.store');
 Route::get('ver-consulta',                  [HistoriaClinicaController::class, 'showConsultaByQuery'])->name('historia-clinica.consultas.show');
+Route::get('editar-consulta',               [HistoriaClinicaController::class, 'editConsultaByQuery'])->name('historia-clinica.consultas.edit');
+Route::post('actualizar-consulta',          [HistoriaClinicaController::class, 'updateConsultaByQuery'])->name('historia-clinica.consultas.update');
+Route::post('eliminar-consulta',            [HistoriaClinicaController::class, 'destroyConsultaByQuery'])->name('historia-clinica.consultas.destroy');
 Route::post('guardar-examen',               [HistoriaClinicaController::class, 'storeExamenByQuery'])->name('historia-clinica.examenes.store');
 Route::get('descargar-examen',              [HistoriaClinicaController::class, 'downloadExamenByQuery'])->name('historia-clinica.examenes.download');
 Route::get('ver-examen',                    [HistoriaClinicaController::class, 'verExamenByQuery'])->name('historia-clinica.examenes.ver');
+Route::post('eliminar-examen',              [HistoriaClinicaController::class, 'destroyExamenByQuery'])->name('historia-clinica.examenes.destroy');
 
 /*
 |--------------------------------------------------------------------------

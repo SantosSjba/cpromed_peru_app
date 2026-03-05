@@ -352,6 +352,59 @@ class HistoriaClinicaController extends Controller
         ]);
     }
 
+    public function editConsulta(Paciente $paciente, HistoriaClinicaConsulta $consulta): View|RedirectResponse
+    {
+        if ((int) $paciente->user_id !== (int) Auth::id() || (int) $consulta->paciente_id !== (int) $paciente->id) {
+            abort(404);
+        }
+        return view('pages.historia-clinica.consulta-edit', [
+            'title' => 'Editar consulta - ' . $paciente->nombre_completo,
+            'paciente' => $paciente,
+            'consulta' => $consulta,
+        ]);
+    }
+
+    public function updateConsulta(Request $request, Paciente $paciente, HistoriaClinicaConsulta $consulta): RedirectResponse
+    {
+        if ((int) $paciente->user_id !== (int) Auth::id() || (int) $consulta->paciente_id !== (int) $paciente->id) {
+            abort(404);
+        }
+        $validated = $request->validate([
+            'fecha_consulta' => ['required', 'date'],
+            'motivo_consulta' => ['nullable', 'string'],
+            'enfermedad_actual' => ['nullable', 'string'],
+            'dx' => ['nullable', 'string'],
+            'tx' => ['nullable', 'string'],
+            'plan_dx' => ['nullable', 'string'],
+            'recomendaciones' => ['nullable', 'string'],
+        ], [], [
+            'fecha_consulta' => 'fecha de consulta',
+        ]);
+
+        $consulta->update([
+            'fecha_consulta' => $validated['fecha_consulta'],
+            'motivo_consulta' => $validated['motivo_consulta'] ?? null,
+            'enfermedad_actual' => $validated['enfermedad_actual'] ?? null,
+            'dx' => $validated['dx'] ?? null,
+            'tx' => $validated['tx'] ?? null,
+            'plan_dx' => $validated['plan_dx'] ?? null,
+            'recomendaciones' => $validated['recomendaciones'] ?? null,
+        ]);
+
+        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+            ->with('success', 'Consulta actualizada correctamente.');
+    }
+
+    public function destroyConsulta(Paciente $paciente, HistoriaClinicaConsulta $consulta): RedirectResponse
+    {
+        if ((int) $paciente->user_id !== (int) Auth::id() || (int) $consulta->paciente_id !== (int) $paciente->id) {
+            abort(404);
+        }
+        $consulta->delete();
+        return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+            ->with('success', 'Consulta eliminada correctamente.');
+    }
+
     public function storeExamen(Request $request, Paciente $paciente): RedirectResponse
     {
         if ((int) $paciente->user_id !== (int) Auth::id()) {
@@ -440,6 +493,20 @@ class HistoriaClinicaController extends Controller
                 'Content-Disposition' => 'inline',
             ]
         );
+    }
+
+    public function destroyExamen(PacienteExamen $examen): RedirectResponse
+    {
+        if ((int) $examen->paciente->user_id !== (int) Auth::id()) {
+            abort(404);
+        }
+        $pacienteId = $examen->paciente_id;
+        if (Storage::disk('local')->exists($examen->path)) {
+            Storage::disk('local')->delete($examen->path);
+        }
+        $examen->delete();
+        return redirect()->route('historia-clinica.ver', ['id' => $pacienteId])
+            ->with('success', 'Examen eliminado correctamente.');
     }
 
     /**
@@ -562,6 +629,48 @@ class HistoriaClinicaController extends Controller
         return $this->showConsulta($paciente, $consulta);
     }
 
+    public function editConsultaByQuery(Request $request): View|RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $paciente = $this->resolverPaciente((int) $request->query('paciente', 0));
+        if ($paciente instanceof RedirectResponse) return $paciente;
+        $consultaId = (int) $request->query('consulta', 0);
+        $consulta = HistoriaClinicaConsulta::find($consultaId);
+        if (! $consulta || (int) $consulta->paciente_id !== (int) $paciente->id) {
+            return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+                ->with('error', 'No se encontró esa consulta.');
+        }
+        return $this->editConsulta($paciente, $consulta);
+    }
+
+    public function updateConsultaByQuery(Request $request): RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $paciente = $this->resolverPaciente((int) $request->input('paciente_id', 0));
+        if ($paciente instanceof RedirectResponse) return $paciente;
+        $consultaId = (int) $request->input('consulta_id', 0);
+        $consulta = HistoriaClinicaConsulta::find($consultaId);
+        if (! $consulta || (int) $consulta->paciente_id !== (int) $paciente->id) {
+            return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+                ->with('error', 'No se encontró esa consulta.');
+        }
+        return $this->updateConsulta($request, $paciente, $consulta);
+    }
+
+    public function destroyConsultaByQuery(Request $request): RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $paciente = $this->resolverPaciente((int) $request->input('paciente_id', 0));
+        if ($paciente instanceof RedirectResponse) return $paciente;
+        $consultaId = (int) $request->input('consulta_id', 0);
+        $consulta = HistoriaClinicaConsulta::find($consultaId);
+        if (! $consulta || (int) $consulta->paciente_id !== (int) $paciente->id) {
+            return redirect()->route('historia-clinica.ver', ['id' => $paciente->id])
+                ->with('error', 'No se encontró esa consulta.');
+        }
+        return $this->destroyConsulta($paciente, $consulta);
+    }
+
     public function storeExamenByQuery(Request $request): RedirectResponse
     {
         if ($r = $this->authGuard()) return $r;
@@ -590,6 +699,17 @@ class HistoriaClinicaController extends Controller
                 ->with('error', 'No se encontró ese examen.');
         }
         return $this->verExamen($examen);
+    }
+
+    public function destroyExamenByQuery(Request $request): RedirectResponse
+    {
+        if ($r = $this->authGuard()) return $r;
+        $examen = PacienteExamen::find((int) $request->input('id', 0));
+        if (! $examen || (int) $examen->paciente->user_id !== (int) Auth::id()) {
+            return redirect()->route('historia-clinica.index')
+                ->with('error', 'No se encontró ese examen.');
+        }
+        return $this->destroyExamen($examen);
     }
 
     /**
