@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotaVentaController;
 use App\Http\Controllers\HistoriaClinicaController;
+use App\Http\Controllers\ConsultaPreciosController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +43,13 @@ Route::get('test-pdf-download', function () {
 
 // PDF sin middleware auth: la autenticación se comprueba en el controlador (evita 404 en algunos cPanel)
 Route::get('descargar-nota-pdf', [NotaVentaController::class, 'pdfByQuery'])->name('notas-venta.pdf');
+
+// Consulta de precios: rutas AJAX con query string (compatibilidad cPanel)
+Route::get('consulta-precios-autocomplete', [ConsultaPreciosController::class, 'autocompleteByQuery'])->name('consulta-precios.autocomplete.qs');
+Route::get('consulta-precios-provincias', [ConsultaPreciosController::class, 'provinciasByQuery'])->name('consulta-precios.provincias.qs');
+Route::get('consulta-precios-distritos', [ConsultaPreciosController::class, 'distritosByQuery'])->name('consulta-precios.distritos.qs');
+Route::post('consulta-precios-buscar', [ConsultaPreciosController::class, 'buscarByQuery'])->name('consulta-precios.buscar.qs');
+Route::post('consulta-precios-detalle', [ConsultaPreciosController::class, 'detalleByQuery'])->name('consulta-precios.detalle.qs');
 
 // Ver nota por query string (misma idea que el PDF: evita problemas de sesión en cPanel con URLs /notas-venta/2)
 Route::get('ver-nota-venta', [NotaVentaController::class, 'showByQuery'])->name('notas-venta.ver');
@@ -143,6 +151,14 @@ Route::middleware('auth')->group(function () {
     Route::get('historia-clinica', [HistoriaClinicaController::class, 'index'])->name('historia-clinica.index');
     Route::get('historia-clinica/crear', [HistoriaClinicaController::class, 'create'])->name('historia-clinica.create');
     Route::post('historia-clinica', [HistoriaClinicaController::class, 'store'])->name('historia-clinica.store');
+
+    // Consulta de precios de medicamentos (SNIPPF - DIGEMID)
+    Route::get('/consulta-precios', [ConsultaPreciosController::class, 'index'])->name('consulta-precios.index');
+    Route::get('/consulta-precios/autocomplete', [ConsultaPreciosController::class, 'autocomplete'])->name('consulta-precios.autocomplete');
+    Route::get('/consulta-precios/provincias', [ConsultaPreciosController::class, 'provincias'])->name('consulta-precios.provincias');
+    Route::get('/consulta-precios/distritos', [ConsultaPreciosController::class, 'distritos'])->name('consulta-precios.distritos');
+    Route::post('/consulta-precios/buscar', [ConsultaPreciosController::class, 'buscar'])->name('consulta-precios.buscar');
+    Route::post('/consulta-precios/detalle', [ConsultaPreciosController::class, 'detalle'])->name('consulta-precios.detalle');
 
     // Cepromed: módulos de negocio (placeholders)
     Route::get('/pacientes', fn () => view('pages.blank', ['title' => 'Pacientes']))->name('pacientes.index');

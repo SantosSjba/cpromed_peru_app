@@ -48,4 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.querySelector('#calendar')) {
         import('./components/calendar-init').then(module => module.calendarInit());
     }
+
+    // XLSX for consulta de precios export
+    if (document.querySelector('[data-module="consulta-precios"]')) {
+        import('xlsx').then(mod => { window.XLSX = mod; });
+    }
 });

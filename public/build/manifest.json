@@ -1,6 +1,12 @@
 {
+  "node_modules/xlsx/xlsx.mjs": {
+    "file": "assets/xlsx-DGuHH-KN.js",
+    "name": "xlsx",
+    "src": "node_modules/xlsx/xlsx.mjs",
+    "isDynamicEntry": true
+  },
   "resources/css/app.css": {
-    "file": "assets/app-BZy6-6WC.css",
+    "file": "assets/app-BmtQjgoM.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -8,7 +14,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DHIVeXpv.js",
+    "file": "assets/app-DyfpI-vc.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -20,14 +26,15 @@
       "resources/js/components/chart/chart-6.js",
       "resources/js/components/chart/chart-8.js",
       "resources/js/components/chart/chart-13.js",
-      "resources/js/components/calendar-init.js"
+      "resources/js/components/calendar-init.js",
+      "node_modules/xlsx/xlsx.mjs"
     ],
     "css": [
       "assets/app-CksuuEqD.css"
     ]
   },
   "resources/js/components/calendar-init.js": {
-    "file": "assets/calendar-init-BGd3_oif.js",
+    "file": "assets/calendar-init-QFAeNHqX.js",
     "name": "calendar-init",
     "src": "resources/js/components/calendar-init.js",
     "isDynamicEntry": true,
