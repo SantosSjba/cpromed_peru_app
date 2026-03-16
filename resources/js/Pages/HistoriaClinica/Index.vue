@@ -2,12 +2,8 @@
   <AppLayout>
     <div class="space-y-6">
       <PageBreadcrumb :page-title="title" :items="[{ label: 'Historia clínica', url: null }]" />
-      <div v-if="flash.success" class="rounded-xl border border-green-200 bg-green-50/80 p-4 text-sm font-medium text-green-800 shadow-sm dark:border-green-800 dark:bg-green-900/20 dark:text-green-400">
-        {{ flash.success }}
-      </div>
-      <div v-if="flash.error" class="rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-        {{ flash.error }}
-      </div>
+      <Alert v-if="flash.success" variant="success" :message="flash.success" />
+      <Alert v-else-if="flash.error" variant="amber" :message="flash.error" />
 
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div></div>
@@ -20,28 +16,26 @@
         </Link>
       </div>
 
-      <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-white/[0.02]">
+      <Card title="Buscar" desc="Buscar por nombre, apellidos o DNI.">
         <form @submit.prevent="submitSearch" class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <label for="buscar" class="sr-only">Buscar por nombre, apellidos o DNI</label>
-          <input
+          <FormInput
             id="buscar"
             v-model="buscar"
             type="search"
+            label="Buscar por nombre, apellidos o DNI"
+            label-class="sr-only"
             placeholder="Buscar por nombre, apellidos o DNI..."
-            @input="onBuscarInput"
-            class="flex-1 rounded-xl border-2 border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            wrapper-class="flex-1 min-w-0"
+            @update:model-value="onBuscarInput"
           />
-          <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600">
-            <Icon icon="mdi:magnify" class="h-4 w-4" />
-            Buscar
-          </button>
-          <Link v-if="buscar.trim()" href="/historia-clinica" class="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
+          <Button type="submit" variant="outline" start-icon="mdi:magnify">Buscar</Button>
+          <Link v-if="buscar.trim()" href="/historia-clinica" class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
             Limpiar
           </Link>
         </form>
-      </div>
+      </Card>
 
-      <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-white/[0.02]">
+      <Card no-header no-padding class="overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead>
@@ -66,7 +60,7 @@
                     <Link :href="'/ver-historia-clinica?id=' + p.id" class="rounded-lg px-3 py-1.5 font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10">Ver</Link>
                     <a :href="'/descargar-historia-clinica-pdf?id=' + p.id" class="rounded-lg px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800">PDF</a>
                     <Link :href="'/editar-historia-clinica?id=' + p.id" class="rounded-lg px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800">Editar</Link>
-                    <button type="button" @click="confirmDelete(p)" class="rounded-lg px-3 py-1.5 font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10">Eliminar</button>
+                    <Button type="button" variant="outlineDanger" size="sm" className="!px-3 !py-1.5 !text-sm" @click="confirmDelete(p)">Eliminar</Button>
                   </div>
                 </td>
               </tr>
@@ -87,7 +81,7 @@
           :total="pacientes.total"
           item-label="paciente(s)"
         />
-      </div>
+      </Card>
     </div>
   </AppLayout>
 </template>
@@ -96,8 +90,10 @@
 import { computed, ref, watch } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import PageBreadcrumb from '../../components/PageBreadcrumb.vue';
-import PaginationLinks from '../../components/PaginationLinks.vue';
+import PageBreadcrumb from '@/components/PageBreadcrumb.vue';
+import PaginationLinks from '@/components/PaginationLinks.vue';
+import { Alert, Card, Button } from '@/components/ui';
+import { FormInput } from '@/components/form';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({

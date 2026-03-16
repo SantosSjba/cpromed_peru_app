@@ -333,6 +333,7 @@ function iconifyName(name) {
     ecommerce: 'mdi:cart',
     forms: 'mdi:clipboard-text',
     pill: 'mdi:pill',
+    vitatrack: 'mdi:scale-bathroom',
   };
   return map[name] || 'mdi:circle';
 }

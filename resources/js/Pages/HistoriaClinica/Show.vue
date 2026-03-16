@@ -2,15 +2,10 @@
   <AppLayout>
     <div class="space-y-6">
       <PageBreadcrumb :page-title="title" :items="breadcrumbItems" />
-      <div v-if="flash.success" class="rounded-xl border border-green-200 bg-green-50/80 p-4 text-sm font-medium text-green-800 shadow-sm dark:border-green-800 dark:bg-green-900/20 dark:text-green-400">
-        {{ flash.success }}
-      </div>
-      <div v-if="flash.error" class="rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-        {{ flash.error }}
-      </div>
+      <Alert v-if="flash.success" variant="success" :message="flash.success" />
+      <Alert v-else-if="flash.error" variant="amber" :message="flash.error" />
 
-      <!-- Cabecera -->
-      <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-white/[0.03]">
+      <Card no-header>
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="flex items-center gap-4">
             <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-2xl font-bold text-brand-600 dark:bg-brand-500/20 dark:text-brand-400">
@@ -36,20 +31,13 @@
             <Link href="/historia-clinica" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
               Volver al listado
             </Link>
-            <button type="button" @click="confirmDelete" class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30">
-              <Icon icon="mdi:delete" class="h-4 w-4" />
-              Eliminar historia clínica
-            </button>
+            <Button type="button" variant="outlineDanger" @click="confirmDelete">Eliminar historia clínica</Button>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <!-- Datos personales -->
-      <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-white/[0.03]">
-        <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Datos personales</h2>
-        </div>
-        <div class="grid grid-cols-1 gap-x-8 gap-y-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
+      <Card title="Datos personales">
+        <div class="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
           <div><p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Nombres</p><p class="mt-1 font-medium text-gray-900 dark:text-white">{{ paciente.nombres }}</p></div>
           <div><p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Apellidos</p><p class="mt-1 font-medium text-gray-900 dark:text-white">{{ paciente.apellidos }}</p></div>
           <div><p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Fecha de nacimiento</p><p class="mt-1 font-medium text-gray-900 dark:text-white">{{ formatDate(paciente.fecha_nacimiento) }}</p></div>
@@ -62,14 +50,10 @@
           <div><p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Ocupación</p><p class="mt-1 font-medium text-gray-900 dark:text-white">{{ paciente.ocupacion || '—' }}</p></div>
           <div><p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Grupo sanguíneo</p><p class="mt-1 font-medium text-gray-900 dark:text-white">{{ paciente.grupo_sanguineo || '—' }}</p></div>
         </div>
-      </div>
+      </Card>
 
-      <!-- Antecedentes -->
-      <div v-if="ficha" class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-white/[0.03]">
-        <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Antecedentes</h2>
-        </div>
-        <div class="space-y-5 p-6">
+      <Card v-if="ficha" title="Antecedentes">
+        <div class="space-y-5">
           <div v-for="item in antecedentesLabels" :key="item.key">
             <p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ item.label }}</p>
             <p class="mt-1.5 whitespace-pre-wrap rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-800 dark:bg-gray-800/50 dark:text-gray-200">{{ ficha[item.key] || '—' }}</p>
@@ -77,27 +61,26 @@
           <div>
             <p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Cirugías</p>
             <p class="mt-1.5">
-              <span :class="ficha.cirugias_si_no ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
-                {{ ficha.cirugias_si_no ? 'Sí' : 'No' }}
-              </span>
+              <Badge :color="ficha.cirugias_si_no ? 'warning' : 'light'">{{ ficha.cirugias_si_no ? 'Sí' : 'No' }}</Badge>
               <span v-if="ficha.cirugias_detalle" class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ ficha.cirugias_detalle }}</span>
             </p>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <!-- Tabla consultas -->
-      <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-white/[0.03]">
-        <div class="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
-          <div>
-            <h2 class="text-base font-semibold text-gray-900 dark:text-white">Tabla de consultas</h2>
-            <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Cada fila es una consulta.</p>
+      <Card no-padding>
+        <template #header>
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 class="text-base font-semibold text-gray-900 dark:text-white">Tabla de consultas</h3>
+              <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Cada fila es una consulta.</p>
+            </div>
+            <Link :href="'/nueva-consulta?paciente=' + paciente.id" class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 hover:bg-brand-600">
+              <Icon icon="mdi:plus" class="h-4 w-4" />
+              Nueva consulta
+            </Link>
           </div>
-          <Link :href="'/nueva-consulta?paciente=' + paciente.id" class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 hover:bg-brand-600">
-            <Icon icon="mdi:plus" class="h-4 w-4" />
-            Nueva consulta
-          </Link>
-        </div>
+        </template>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead>
@@ -127,23 +110,20 @@
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
-      <!-- Exámenes -->
-      <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-white/[0.03]">
-        <div class="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
-          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Exámenes</h2>
-          <button type="button" @click="showExamenForm = !showExamenForm" class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 hover:bg-brand-600">
-            <Icon icon="mdi:upload" class="h-4 w-4" />
-            Subir examen
-          </button>
-        </div>
-        <div v-show="showExamenForm" class="border-b border-gray-200 p-6 dark:border-gray-700">
-          <form @submit.prevent="submitExamen" class="rounded-xl border border-dashed border-gray-300 bg-gray-50/80 p-6 dark:border-gray-600 dark:bg-gray-800/30">
+      <Card>
+        <template #header>
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Exámenes</h3>
+            <Button type="button" start-icon="mdi:upload" @click="showExamenForm = !showExamenForm">Subir examen</Button>
+          </div>
+        </template>
+        <div v-show="showExamenForm" class="mb-6 rounded-xl border border-dashed border-gray-300 bg-gray-50/80 p-6 dark:border-gray-600 dark:bg-gray-800/30">
+          <form @submit.prevent="submitExamen">
             <input type="hidden" name="paciente_id" :value="paciente.id" />
             <div class="mb-4">
-              <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha del examen (común para todos)</label>
-              <input v-model="fechaExamen" type="date" class="input-hc max-w-xs" />
+              <FormInput v-model="fechaExamen" type="date" label="Fecha del examen (común para todos)" wrapper-class="max-w-xs" />
             </div>
             <div class="mb-4">
               <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Seleccionar archivos (PDF o imágenes)</label>
@@ -154,17 +134,17 @@
               <h4 class="text-sm font-semibold text-gray-800 dark:text-white">Complete Tipo y Descripción por cada archivo</h4>
               <div v-for="(row, idx) in fileRows" :key="idx" class="flex flex-col gap-2 rounded-lg border border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700 sm:flex-row sm:items-center sm:gap-4">
                 <span class="truncate text-sm font-medium text-gray-800 dark:text-gray-200">{{ row.fileName }}</span>
-                <input v-model="row.tipo" type="text" placeholder="Ej. Laboratorio" class="input-hc flex-1" />
-                <input v-model="row.descripcion" type="text" placeholder="Descripción" class="input-hc flex-[2]" />
+                <FormInput v-model="row.tipo" placeholder="Ej. Laboratorio" wrapper-class="flex-1 !mb-0" />
+                <FormInput v-model="row.descripcion" placeholder="Descripción" wrapper-class="flex-[2] !mb-0" />
               </div>
             </div>
             <div v-if="fileRows.length" class="flex flex-wrap gap-3">
-              <button type="submit" class="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600">Subir exámenes</button>
-              <button type="button" @click="clearFiles" class="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">Cambiar archivos</button>
+              <Button type="submit">Subir exámenes</Button>
+              <Button type="button" variant="outline" @click="clearFiles">Cambiar archivos</Button>
             </div>
           </form>
         </div>
-        <div class="p-6">
+        <div>
           <template v-if="examenesPorFecha && examenesPorFecha.length">
             <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">Exámenes agrupados por fecha.</p>
             <div v-for="grupo in examenesPorFecha" :key="grupo.fecha" class="mb-6 last:mb-0">
@@ -190,7 +170,7 @@
                       <td class="px-4 py-2.5 text-right">
                         <a v-if="isPdf(e.file_name)" :href="'/ver-examen?id=' + e.id" target="_blank" rel="noopener noreferrer" class="font-medium text-brand-600 hover:underline dark:text-brand-400 mr-3">Ver</a>
                         <a :href="'/descargar-examen?id=' + e.id" class="font-medium text-brand-600 hover:underline dark:text-brand-400 mr-3">Descargar</a>
-                        <button type="button" @click="confirmDeleteExamen(e)" class="font-medium text-red-600 hover:underline dark:text-red-400">Eliminar</button>
+                        <Button type="button" variant="outlineDanger" size="sm" className="!px-0 !py-0 !text-sm" @click="confirmDeleteExamen(e)">Eliminar</Button>
                       </td>
                     </tr>
                   </tbody>
@@ -200,7 +180,7 @@
           </template>
           <p v-else class="py-8 text-center text-gray-500 dark:text-gray-400">No hay exámenes subidos. Use «Subir examen».</p>
         </div>
-      </div>
+      </Card>
     </div>
   </AppLayout>
 </template>
@@ -209,7 +189,9 @@
 import { computed, ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import PageBreadcrumb from '../../components/PageBreadcrumb.vue';
+import PageBreadcrumb from '@/components/PageBreadcrumb.vue';
+import { Alert, Card, Button, Badge } from '@/components/ui';
+import { FormInput } from '@/components/form';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({

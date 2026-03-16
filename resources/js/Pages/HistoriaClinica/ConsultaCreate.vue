@@ -2,29 +2,27 @@
   <AppLayout>
     <div class="space-y-6">
       <PageBreadcrumb :page-title="title" :items="breadcrumbItems" />
-      <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-white/[0.03] lg:p-6">
-      <ul v-if="Object.keys(form.errors).length" class="mb-4 list-inside list-disc rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
-        <li v-for="(err, key) in form.errors" :key="key">{{ err }}</li>
-      </ul>
-      <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">Paciente: <strong>{{ paciente.nombres }} {{ paciente.apellidos }}</strong>. Esta consulta se guardará como una nueva fila en la tabla de consultas.</p>
-      <form @submit.prevent="form.post('/guardar-consulta')" class="space-y-4">
-        <input type="hidden" name="paciente_id" :value="paciente.id" />
-        <div>
-          <label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Fecha de consulta <span class="text-red-500">*</span></label>
-          <input v-model="form.fecha_consulta" type="datetime-local" class="input-hc" required />
-        </div>
-        <div><label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Motivo de consulta</label><textarea v-model="form.motivo_consulta" rows="3" class="input-hc w-full min-h-[80px]"></textarea></div>
-        <div><label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Enfermedad actual</label><textarea v-model="form.enfermedad_actual" rows="3" class="input-hc w-full min-h-[80px]"></textarea></div>
-        <div><label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Dx (Diagnóstico)</label><textarea v-model="form.dx" rows="3" class="input-hc w-full min-h-[80px]"></textarea></div>
-        <div><label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Tx (Tratamiento)</label><textarea v-model="form.tx" rows="3" class="input-hc w-full min-h-[80px]"></textarea></div>
-        <div><label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Plan Dx.</label><textarea v-model="form.plan_dx" rows="2" class="input-hc w-full min-h-[60px]"></textarea></div>
-        <div><label class="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-200">Recomendaciones</label><textarea v-model="form.recomendaciones" rows="2" class="input-hc w-full min-h-[60px]"></textarea></div>
-        <div class="flex flex-wrap gap-3">
-          <button type="submit" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">Guardar consulta</button>
-          <Link :href="'/ver-historia-clinica?id=' + paciente.id" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300">Volver</Link>
-        </div>
-      </form>
-    </div>
+      <Card title="Nueva consulta" :desc="'Paciente: ' + paciente.nombres + ' ' + paciente.apellidos + '. Esta consulta se guardará como una nueva fila en la tabla de consultas.'">
+        <Alert v-if="Object.keys(form.errors).length" variant="error" title="Errores de validación">
+          <ul class="list-inside list-disc text-sm">
+            <li v-for="(err, key) in form.errors" :key="key">{{ err }}</li>
+          </ul>
+        </Alert>
+        <form @submit.prevent="form.post('/guardar-consulta')" class="space-y-4">
+          <input type="hidden" name="paciente_id" :value="paciente.id" />
+          <FormInput v-model="form.fecha_consulta" type="datetime-local" label="Fecha de consulta" required />
+          <FormTextarea v-model="form.motivo_consulta" label="Motivo de consulta" :rows="3" />
+          <FormTextarea v-model="form.enfermedad_actual" label="Enfermedad actual" :rows="3" />
+          <FormTextarea v-model="form.dx" label="Dx (Diagnóstico)" :rows="3" />
+          <FormTextarea v-model="form.tx" label="Tx (Tratamiento)" :rows="3" />
+          <FormTextarea v-model="form.plan_dx" label="Plan Dx." :rows="2" />
+          <FormTextarea v-model="form.recomendaciones" label="Recomendaciones" :rows="2" />
+          <div class="flex flex-wrap gap-3">
+            <Button type="submit">Guardar consulta</Button>
+            <Link :href="'/ver-historia-clinica?id=' + paciente.id" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300">Volver</Link>
+          </div>
+        </form>
+      </Card>
     </div>
   </AppLayout>
 </template>
@@ -33,7 +31,9 @@
 import { computed, onMounted } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import PageBreadcrumb from '../../components/PageBreadcrumb.vue';
+import PageBreadcrumb from '@/components/PageBreadcrumb.vue';
+import { Card, Button, Alert } from '@/components/ui';
+import { FormInput, FormTextarea } from '@/components/form';
 
 const props = defineProps({
   title: { type: String, default: 'Nueva consulta' },
@@ -61,8 +61,3 @@ onMounted(() => {
   if (!form.fecha_consulta) form.fecha_consulta = new Date().toISOString().slice(0, 16);
 });
 </script>
-
-<style scoped>
-.input-hc { height: 2.75rem; width: 100%; border-radius: 0.5rem; border: 2px solid #9ca3af; background: #fff; padding: 0.5rem 1rem; font-size: 0.875rem; }
-textarea.input-hc { min-height: 5rem; resize: vertical; }
-</style>

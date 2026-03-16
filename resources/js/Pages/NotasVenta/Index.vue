@@ -2,54 +2,41 @@
   <AppLayout>
     <div class="space-y-6">
       <PageBreadcrumb :page-title="title" :items="[{ label: 'Notas de venta', url: null }]" />
-      <div v-if="flash.success" class="rounded-xl border border-green-200 bg-green-50/80 p-4 text-sm font-medium text-green-800 shadow-sm dark:border-green-800 dark:bg-green-900/20 dark:text-green-400">
-        {{ flash.success }}
-      </div>
-      <div v-if="flash.error" class="rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-        {{ flash.error }}
-      </div>
+      <Alert v-if="flash.success" variant="success" :message="flash.success" />
+      <Alert v-else-if="flash.error" variant="amber" :message="flash.error" />
 
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div></div>
-        <Link
-          href="/notas-venta/create"
-          class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:bg-brand-600 hover:shadow-brand-500/30"
-        >
+        <Link href="/notas-venta/create" class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:bg-brand-600 hover:shadow-brand-500/30">
           <Icon icon="mdi:plus" class="h-5 w-5" />
           Nueva nota de venta
         </Link>
       </div>
 
-      <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-white/[0.02]">
+      <Card title="Buscar" desc="La búsqueda se ejecuta al enviar el formulario.">
         <form @submit.prevent="submitSearch" class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <label for="buscar-notas" class="sr-only">Buscar por cliente o número de documento</label>
-          <input
+          <FormInput
             id="buscar-notas"
             v-model="buscar"
             type="search"
+            label="Buscar por cliente o número de documento"
+            label-class="sr-only"
             placeholder="Buscar por cliente o número de documento..."
-            @input="onBuscarInput"
-            class="flex-1 rounded-xl border-2 border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-900 shadow-sm placeholder-gray-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+            wrapper-class="flex-1 min-w-0"
+            @update:model-value="onBuscarInput"
           />
-          <button
-            type="submit"
-            class="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600"
-          >
-            <Icon icon="mdi:magnify" class="h-4 w-4" />
-            Buscar
-          </button>
+          <Button type="submit" variant="outline" start-icon="mdi:magnify">Buscar</Button>
           <Link
             v-if="buscar.trim()"
             href="/notas-venta"
-            class="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+            class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             Limpiar
           </Link>
         </form>
-        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">La búsqueda se ejecuta al enviar el formulario.</p>
-      </div>
+      </Card>
 
-      <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-white/[0.02]">
+      <Card no-header no-padding class="overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead>
@@ -73,7 +60,7 @@
                   <div class="flex items-center justify-end gap-2">
                     <Link :href="'/ver-nota-venta?id=' + nota.id" class="rounded-lg px-3 py-1.5 font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10">Ver</Link>
                     <a :href="'/descargar-nota-pdf?id=' + nota.id" class="rounded-lg px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800">PDF</a>
-                    <button type="button" @click="confirmDelete(nota)" class="rounded-lg px-3 py-1.5 font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10">Eliminar</button>
+                    <Button type="button" variant="outlineDanger" size="sm" className="!px-3 !py-1.5 !text-sm" @click="confirmDelete(nota)">Eliminar</Button>
                   </div>
                 </td>
               </tr>
@@ -94,7 +81,7 @@
           :total="notas.total"
           item-label="nota(s)"
         />
-      </div>
+      </Card>
     </div>
   </AppLayout>
 </template>
@@ -103,8 +90,10 @@
 import { computed, ref, watch } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import PageBreadcrumb from '../../components/PageBreadcrumb.vue';
-import PaginationLinks from '../../components/PaginationLinks.vue';
+import PageBreadcrumb from '@/components/PageBreadcrumb.vue';
+import PaginationLinks from '@/components/PaginationLinks.vue';
+import { Alert, Card, Button } from '@/components/ui';
+import { FormInput } from '@/components/form';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({

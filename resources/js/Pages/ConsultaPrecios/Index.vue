@@ -11,9 +11,7 @@
         </a>
       </div>
 
-      <!-- Filtros -->
-      <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-white/[0.02]">
-        <h2 class="mb-4 text-base font-semibold text-gray-900 dark:text-white">Filtros de búsqueda</h2>
+      <Card title="Filtros de búsqueda">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <!-- Producto autocomplete -->
           <div ref="productoAutocompleteRef" class="relative lg:col-span-2">
@@ -54,62 +52,58 @@
             </div>
           </div>
 
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Tipo establecimiento</label>
-            <select v-model="filtros.codTipoEstablecimiento" class="input-cp w-full">
-              <option value="">Todos</option>
-              <option value="1">Privado</option>
-              <option value="2">Público</option>
-            </select>
-          </div>
+          <FormSelect v-model="filtros.codTipoEstablecimiento" label="Tipo establecimiento">
+            <option value="">Todos</option>
+            <option value="1">Privado</option>
+            <option value="2">Público</option>
+          </FormSelect>
 
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Departamento <span class="text-red-500">*</span></label>
-            <select v-model="filtros.codigoDepartamento" class="input-cp w-full" @change="onDepartamentoChange">
-              <option value="">— Seleccionar —</option>
-              <option v-for="(nombre, cod) in (departamentos || {})" :key="cod" :value="cod">{{ nombre }}</option>
-            </select>
-          </div>
+          <FormSelect
+            v-model="filtros.codigoDepartamento"
+            label="Departamento"
+            placeholder="— Seleccionar —"
+            required
+            @update:model-value="onDepartamentoChange"
+          >
+            <option v-for="(nombre, cod) in (departamentos || {})" :key="cod" :value="cod">{{ nombre }}</option>
+          </FormSelect>
 
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Provincia</label>
-            <select v-model="filtros.codigoProvincia" class="input-cp w-full" :disabled="!filtros.codigoDepartamento || loadingProvincias" @change="onProvinciaChange">
-              <option value="">— Seleccionar —</option>
-              <option v-for="p in provincias" :key="p.codigo" :value="p.codigo">{{ p.descripcion }}</option>
-            </select>
-          </div>
+          <FormSelect
+            v-model="filtros.codigoProvincia"
+            label="Provincia"
+            placeholder="— Seleccionar —"
+            :disabled="!filtros.codigoDepartamento || loadingProvincias"
+            @update:model-value="onProvinciaChange"
+          >
+            <option v-for="p in provincias" :key="p.codigo" :value="p.codigo">{{ p.descripcion }}</option>
+          </FormSelect>
 
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Distrito</label>
-            <select v-model="filtros.codigoUbigeo" class="input-cp w-full" :disabled="!filtros.codigoProvincia || loadingDistritos">
-              <option value="">— Todos —</option>
-              <option v-for="d in distritos" :key="d.codigo" :value="d.codigo">{{ d.descripcion }}</option>
-            </select>
-          </div>
+          <FormSelect
+            v-model="filtros.codigoUbigeo"
+            label="Distrito"
+            placeholder="— Todos —"
+            :disabled="!filtros.codigoProvincia || loadingDistritos"
+          >
+            <option v-for="d in distritos" :key="d.codigo" :value="d.codigo">{{ d.descripcion }}</option>
+          </FormSelect>
 
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Laboratorio</label>
-            <input v-model="filtros.nombreLaboratorio" type="text" placeholder="Nombre laboratorio..." class="input-cp w-full" />
-          </div>
-
-          <div>
-            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Farmacia / Botica</label>
-            <input v-model="filtros.nombreEstablecimiento" type="text" placeholder="Nombre establecimiento..." class="input-cp w-full" />
-          </div>
+          <FormInput v-model="filtros.nombreLaboratorio" label="Laboratorio" placeholder="Nombre laboratorio..." />
+          <FormInput v-model="filtros.nombreEstablecimiento" label="Farmacia / Botica" placeholder="Nombre establecimiento..." />
         </div>
 
         <div class="mt-5 flex flex-wrap items-center gap-3">
-          <button @click="buscarPrecios()" :disabled="!puedeConsultar || loadingPrecios" class="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50">
-            <Icon v-show="!loadingPrecios" icon="mdi:magnify" class="h-4 w-4" />
-            <Icon v-show="loadingPrecios" icon="mdi:loading" class="h-4 w-4 animate-spin" />
+          <Button @click="buscarPrecios()" :disabled="!puedeConsultar || loadingPrecios">
+            <template #startIcon>
+              <Icon :icon="loadingPrecios ? 'mdi:loading' : 'mdi:magnify'" class="h-4 w-4" :class="{ 'animate-spin': loadingPrecios }" />
+            </template>
             {{ loadingPrecios ? 'Consultando...' : 'Consultar precios' }}
-          </button>
-          <button type="button" @click="limpiarFiltros()" class="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">Limpiar</button>
+          </Button>
+          <Button type="button" variant="outline" @click="limpiarFiltros()">Limpiar</Button>
         </div>
         <p v-show="!puedeConsultar" class="mt-2 text-xs text-amber-600 dark:text-amber-400">Seleccione un producto del autocomplete y un departamento.</p>
-      </div>
+      </Card>
 
-      <div v-show="errorMsg" class="rounded-xl border border-red-200 bg-red-50/80 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{{ errorMsg }}</div>
+      <Alert v-show="errorMsg" variant="error" :message="errorMsg" />
 
       <!-- Resultados -->
       <div v-show="resultados.length > 0 || (buscado && resultados.length === 0)">
@@ -133,29 +127,33 @@
         </div>
 
         <div v-show="resultados.length > 0" class="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-white/[0.02]">
-          <div class="relative w-full sm:min-w-[180px] sm:flex-1">
-            <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-            <input v-model="busquedaTabla" type="text" placeholder="Filtrar por farmacia o laboratorio..." class="w-full rounded-lg border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-xs text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400" />
-          </div>
-          <select v-model="filtroTabla" class="appearance-none rounded-lg border border-gray-300 bg-white py-1.5 pl-3 pr-8 text-xs text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">
+          <FormInput
+            v-model="busquedaTabla"
+            type="text"
+            placeholder="Filtrar por farmacia o laboratorio..."
+            size="sm"
+            wrapper-class="w-full sm:min-w-[180px] sm:flex-1"
+            label-class="sr-only"
+            label="Filtrar tabla"
+          />
+          <FormSelect v-model="filtroTabla" size="sm" wrapper-class="min-w-0" label-class="sr-only" label="Tipo">
             <option value="">Todos los tipos</option>
             <option value="Privado">Privado</option>
             <option value="Público">Público</option>
-          </select>
-          <select v-model="ordenPrecio" class="appearance-none rounded-lg border border-gray-300 bg-white py-1.5 pl-3 pr-8 text-xs text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">
+          </FormSelect>
+          <FormSelect v-model="ordenPrecio" size="sm" wrapper-class="min-w-0" label-class="sr-only" label="Ordenar">
             <option value="">Ordenar</option>
             <option value="asc">Precio ↑</option>
             <option value="desc">Precio ↓</option>
-          </select>
-          <select v-model="porPagina" class="appearance-none rounded-lg border border-gray-300 bg-white py-1.5 pl-3 pr-8 text-xs text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">
+          </FormSelect>
+          <FormSelect v-model="porPagina" size="sm" wrapper-class="min-w-0" label-class="sr-only" label="Por página">
             <option value="10">10 por página</option>
             <option value="20">20 por página</option>
             <option value="50">50 por página</option>
-          </select>
-          <button type="button" @click="exportarXLSX()" class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30">
-            <Icon icon="mdi:download" class="h-3.5 w-3.5" />
+          </FormSelect>
+          <Button type="button" variant="outline" size="sm" className="!border-emerald-300 !bg-emerald-50 !text-emerald-700 hover:!bg-emerald-100 dark:!border-emerald-700 dark:!bg-emerald-900/20 dark:!text-emerald-400" start-icon="mdi:download" @click="exportarXLSX()">
             Exportar Excel
-          </button>
+          </Button>
           <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">
             <span class="font-semibold text-gray-800 dark:text-gray-200">{{ resultadosFiltrados.length }}</span>
             de <span>{{ resultados.length }}</span> resultados
@@ -184,7 +182,7 @@
               <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
                 <tr v-for="(item, idx) in paginados" :key="idx" class="transition hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <td class="px-4 py-3">
-                    <span :class="(item?.setcodigo) === 'Privado' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' : 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'" class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium">{{ item?.setcodigo ?? '—' }}</span>
+                    <Badge :color="(item?.setcodigo) === 'Privado' ? 'primary' : 'success'">{{ item?.setcodigo ?? '—' }}</Badge>
                   </td>
                   <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ item?.nombreComercial ?? '—' }}</td>
                   <td class="px-4 py-3">
@@ -196,7 +194,7 @@
                   <td class="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">{{ item?.precio2 != null ? 'S/ ' + Number(item.precio2).toFixed(2) : '—' }}</td>
                   <td class="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">{{ item?.precio1 != null ? 'S/ ' + Number(item.precio1).toFixed(2) : '—' }}</td>
                   <td class="px-4 py-3 text-center">
-                    <button type="button" @click="verDetalle(item)" class="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm hover:border-brand-400 hover:bg-brand-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Ver</button>
+                    <Button type="button" variant="outline" size="sm" className="!px-2.5 !py-1 !text-xs" @click="verDetalle(item)">Ver</Button>
                   </td>
                 </tr>
               </tbody>
@@ -259,8 +257,10 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import PageBreadcrumb from '../../components/PageBreadcrumb.vue';
-import PaginationLinks from '../../components/PaginationLinks.vue';
+import PageBreadcrumb from '@/components/PageBreadcrumb.vue';
+import PaginationLinks from '@/components/PaginationLinks.vue';
+import { Card, Button, Alert, Badge } from '@/components/ui';
+import { FormInput, FormSelect } from '@/components/form';
 import { Icon } from '@iconify/vue';
 
 const productoAutocompleteRef = ref(null);
@@ -556,19 +556,3 @@ async function exportarXLSX() {
   XLSX.writeFile(wb, `precios_${nombre}_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 </script>
-
-<style scoped>
-.input-cp {
-  height: 2.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-}
-.dark .input-cp {
-  border-color: #4b5563;
-  background: #1f2937;
-  color: #f9fafb;
-}
-</style>

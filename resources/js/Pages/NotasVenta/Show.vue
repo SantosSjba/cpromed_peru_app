@@ -19,23 +19,14 @@
             <Icon icon="mdi:file-pdf-box" class="h-5 w-5" />
             Descargar PDF
           </a>
-          <Link
-            href="/notas-venta"
-            class="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
+          <Link href="/notas-venta" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
             Volver al listado
           </Link>
-          <button
-            type="button"
-            @click="confirmDelete"
-            class="inline-flex items-center gap-2 rounded-xl border border-red-300 px-5 py-3 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
-          >
-            Eliminar
-          </button>
+          <Button type="button" variant="outlineDanger" @click="confirmDelete">Eliminar</Button>
         </div>
       </div>
 
-      <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-white/[0.02]">
+      <Card no-header>
         <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
           <h2 class="text-base font-semibold text-gray-900 dark:text-white">Datos generales</h2>
         </div>
@@ -77,9 +68,9 @@
           <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Notas</dt>
           <dd class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ nota.notas }}</dd>
         </div>
-      </div>
+      </Card>
 
-      <div v-if="nota.detalles && nota.detalles.length > 0" class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-white/[0.02]">
+      <Card v-if="nota.detalles && nota.detalles.length > 0" no-header no-padding class="overflow-hidden">
         <div class="border-b border-gray-200 bg-gray-50/80 px-5 py-4 dark:border-gray-700 dark:bg-gray-800/80">
           <h2 class="text-base font-semibold text-gray-900 dark:text-white">Detalles</h2>
         </div>
@@ -113,7 +104,7 @@
           <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Total</span>
           <span class="text-lg font-semibold text-gray-900 dark:text-white">S/ {{ formatNum(nota.total) }}</span>
         </div>
-      </div>
+      </Card>
     </div>
   </AppLayout>
 </template>
@@ -122,7 +113,8 @@
 import { computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import PageBreadcrumb from '../../components/PageBreadcrumb.vue';
+import PageBreadcrumb from '@/components/PageBreadcrumb.vue';
+import { Card, Button } from '@/components/ui';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({

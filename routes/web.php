@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotaVentaController;
 use App\Http\Controllers\HistoriaClinicaController;
 use App\Http\Controllers\ConsultaPreciosController;
+use App\Http\Controllers\ControlPesoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,15 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get')->middleware('auth');
+
+// VitaTrack - Control de Peso (query-string para compatibilidad cPanel)
+Route::get('ver-control-peso',          [ControlPesoController::class, 'showByQuery'])->name('control-peso.ver');
+Route::post('configurar-control-peso',  [ControlPesoController::class, 'configurar'])->name('control-peso.configurar');
+Route::post('guardar-peso-registro',    [ControlPesoController::class, 'guardarRegistro'])->name('control-peso.guardar-registro');
+Route::post('eliminar-peso-registro',   [ControlPesoController::class, 'eliminarRegistro'])->name('control-peso.eliminar-registro');
+Route::post('actualizar-recompensas',   [ControlPesoController::class, 'actualizarRecompensas'])->name('control-peso.recompensas');
+Route::post('eliminar-control-peso',    [ControlPesoController::class, 'eliminarSeguimiento'])->name('control-peso.eliminar');
+Route::post('crear-paciente-rapido',    [ControlPesoController::class, 'crearPacienteRapido'])->name('control-peso.crear-paciente');
 
 // Prueba de enrutado en cPanel: si ves "OK" aquí, Laravel y mod_rewrite funcionan (borrar en producción)
 Route::get('test-pdf-route', function () {
@@ -134,6 +144,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/consulta-precios/distritos', [ConsultaPreciosController::class, 'distritos'])->name('consulta-precios.distritos');
     Route::post('/consulta-precios/buscar', [ConsultaPreciosController::class, 'buscar'])->name('consulta-precios.buscar');
     Route::post('/consulta-precios/detalle', [ConsultaPreciosController::class, 'detalle'])->name('consulta-precios.detalle');
+
+    // VitaTrack: Control de Peso
+    Route::get('/control-peso', [ControlPesoController::class, 'index'])->name('control-peso.index');
 
     // Cepromed: módulos de negocio (placeholders - Vue Blank)
     Route::get('/pacientes', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Pacientes']))->name('pacientes.index');

@@ -27,6 +27,11 @@ class MenuHelper
                 'name' => 'Precios medicamentos',
                 'path' => '/consulta-precios',
             ],
+            [
+                'icon' => 'vitatrack',
+                'name' => 'VitaTrack',
+                'path' => '/control-peso',
+            ],
         ];
     }
 
