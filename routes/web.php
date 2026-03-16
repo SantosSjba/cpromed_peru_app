@@ -30,6 +30,10 @@ Route::post('actualizar-recompensas',   [ControlPesoController::class, 'actualiz
 Route::post('eliminar-control-peso',    [ControlPesoController::class, 'eliminarSeguimiento'])->name('control-peso.eliminar');
 Route::post('crear-paciente-rapido',    [ControlPesoController::class, 'crearPacienteRapido'])->name('control-peso.crear-paciente');
 
+// Seguimiento público por token (paciente ve avance y registra peso sin usuario/contraseña)
+Route::get('seguimiento/{token}',              [ControlPesoController::class, 'showPublicByToken'])->name('seguimiento.publico');
+Route::post('seguimiento/{token}/registro',   [ControlPesoController::class, 'guardarRegistroPublico'])->name('seguimiento.guardar-registro');
+
 // Prueba de enrutado en cPanel: si ves "OK" aquí, Laravel y mod_rewrite funcionan (borrar en producción)
 Route::get('test-pdf-route', function () {
     return response('OK - Laravel enruta correctamente. Puedes borrar esta ruta después.', 200, [
@@ -147,6 +151,7 @@ Route::middleware('auth')->group(function () {
 
     // VitaTrack: Control de Peso
     Route::get('/control-peso', [ControlPesoController::class, 'index'])->name('control-peso.index');
+    Route::post('/control-peso/generar-enlace', [ControlPesoController::class, 'generarEnlace'])->name('control-peso.generar-enlace');
 
     // Cepromed: módulos de negocio (placeholders - Vue Blank)
     Route::get('/pacientes', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Pacientes']))->name('pacientes.index');

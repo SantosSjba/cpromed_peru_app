@@ -8,6 +8,7 @@ use App\Models\Paciente;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -345,5 +346,120 @@ class ControlPesoController extends Controller
 
         return redirect()->route('control-peso.index')
             ->with('success', 'Seguimiento eliminado.');
+    }
+
+    // ─── Enlace público: el paciente ve su avance y registra peso (sin usuario/contraseña) ───
+
+    /** GET /seguimiento/{token} — Vista pública por token. */
+    public function showPublicByToken(string $token): Response|RedirectResponse
+    {
+        $cfg = ControlPesoConfig::where('share_token', $token)
+            ->with(['paciente', 'registros'])
+            ->first();
+
+        if (! $cfg) {
+            return redirect()->route('signin')->with('error', 'Enlace no válido o expirado.');
+        }
+
+        $registros = $cfg->registros->sortBy('fecha')->values();
+
+        $tabla = $registros->map(function (ControlPesoRegistro $r, int $idx) use ($cfg, $registros) {
+            $imc       = ControlPesoConfig::calcularImc($r->peso, $cfg->talla);
+            $categoria = ControlPesoConfig::categoriaImc($imc);
+            $pctCambio = $cfg->peso_inicial > 0
+                ? round((($r->peso - $cfg->peso_inicial) / $cfg->peso_inicial) * 100, 1)
+                : 0;
+
+            return [
+                'id'         => $r->id,
+                'semana'     => $idx + 1,
+                'fecha'      => $r->fecha->format('Y-m-d'),
+                'peso'       => $r->peso,
+                'pct_cambio' => $pctCambio,
+                'imc'        => $imc,
+                'imc_cat'    => $categoria['label'],
+                'imc_color'  => $categoria['color'],
+                'notas'      => $r->notas ?? '',
+            ];
+        })->values();
+
+        $pesoActual  = $registros->last()?->peso ?? $cfg->peso_inicial;
+        $imcActual   = ControlPesoConfig::calcularImc($pesoActual, $cfg->talla);
+        $catActual   = ControlPesoConfig::categoriaImc($imcActual);
+        $kgPerdidos  = round($cfg->peso_inicial - $pesoActual, 2);
+        $progresoPct = ($cfg->peso_meta && ($cfg->peso_inicial - $cfg->peso_meta) > 0)
+            ? min(100, round(($kgPerdidos / ($cfg->peso_inicial - $cfg->peso_meta)) * 100, 1))
+            : null;
+
+        return Inertia::render('ControlPeso/PublicShow', [
+            'title'    => 'Mi seguimiento · VitaTrack',
+            'token'    => $token,
+            'config'   => [
+                'id'           => $cfg->id,
+                'peso_inicial' => $cfg->peso_inicial,
+                'talla'        => $cfg->talla,
+                'peso_meta'    => $cfg->peso_meta,
+                'fecha_inicio' => $cfg->fecha_inicio?->format('Y-m-d'),
+                'fecha_meta'   => $cfg->fecha_meta?->format('Y-m-d'),
+            ],
+            'paciente' => [
+                'nombre' => $cfg->paciente->nombre_completo ?? '—',
+            ],
+            'tabla'    => $tabla,
+            'resumen'  => [
+                'peso_actual'   => $pesoActual,
+                'imc_actual'    => $imcActual,
+                'imc_categoria' => $catActual['label'],
+                'imc_color'     => $catActual['color'],
+                'kg_perdidos'   => $kgPerdidos,
+                'progreso_pct'  => $progresoPct,
+            ],
+        ]);
+    }
+
+    /** POST /seguimiento/{token}/registro — El paciente registra su peso (sin auth). */
+    public function guardarRegistroPublico(Request $request, string $token): RedirectResponse
+    {
+        $cfg = ControlPesoConfig::where('share_token', $token)->first();
+
+        if (! $cfg) {
+            return redirect()->route('signin')->with('error', 'Enlace no válido.');
+        }
+
+        $data = $request->validate([
+            'fecha' => ['required', 'date'],
+            'peso'  => ['required', 'numeric', 'min:1', 'max:500'],
+            'notas' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        ControlPesoRegistro::create([
+            'config_id' => $cfg->id,
+            'fecha'     => $data['fecha'],
+            'peso'      => $data['peso'],
+            'notas'     => $data['notas'] ?? null,
+        ]);
+
+        return redirect()->route('seguimiento.publico', ['token' => $token])
+            ->with('success', 'Registro guardado correctamente.');
+    }
+
+    /** POST — Generar o obtener enlace público para el paciente (requiere auth). */
+    public function generarEnlace(Request $request): \Illuminate\Http\JsonResponse
+    {
+        if (! Auth::check()) {
+            return response()->json(['error' => 'No autorizado.'], 403);
+        }
+
+        $configId = (int) $request->input('config_id');
+        $cfg      = ControlPesoConfig::where('id', $configId)->where('user_id', Auth::id())->firstOrFail();
+
+        if (empty($cfg->share_token)) {
+            $cfg->share_token = ControlPesoConfig::generarShareToken();
+            $cfg->save();
+        }
+
+        $url = URL::route('seguimiento.publico', ['token' => $cfg->share_token], true);
+
+        return response()->json(['url' => $url, 'token' => $cfg->share_token]);
     }
 }

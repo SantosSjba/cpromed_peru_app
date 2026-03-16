@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import path from 'path';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
+import vueDevTools from 'vite-plugin-vue-devtools';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
@@ -11,6 +12,7 @@ export default defineConfig({
         },
     },
     plugins: [
+        vueDevTools(),
         laravel({
             input: [
                 'resources/css/app.css',

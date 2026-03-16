@@ -19,7 +19,18 @@ class ControlPesoConfig extends Model
         'fecha_inicio',
         'fecha_meta',
         'recompensas',
+        'share_token',
     ];
+
+    /** Genera un token único para el enlace público del paciente (sin usuario/contraseña). */
+    public static function generarShareToken(): string
+    {
+        do {
+            $token = bin2hex(random_bytes(24));
+        } while (self::where('share_token', $token)->exists());
+
+        return $token;
+    }
 
     protected $casts = [
         'peso_inicial' => 'float',

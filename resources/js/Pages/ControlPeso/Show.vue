@@ -33,6 +33,35 @@
         </div>
       </Card>
 
+      <!-- Enlace para el paciente (sin usuario ni contraseña) -->
+      <Card no-header>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-900/40">
+              <Icon icon="mdi:link-variant" class="h-5 w-5 text-sky-600 dark:text-sky-400" />
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 dark:text-white">Enlace para el paciente</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400">El paciente puede ver su avance y registrar su peso sin usuario ni contraseña.</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              :disabled="loadingEnlace"
+              @click="obtenerEnlacePaciente"
+              class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
+            >
+              <Icon :icon="enlacePaciente ? 'mdi:content-copy' : 'mdi:link-plus'" class="h-4 w-4" />
+              {{ loadingEnlace ? 'Generando…' : enlacePaciente ? 'Copiar enlace' : 'Generar enlace' }}
+            </button>
+            <p v-if="enlacePaciente" class="max-w-full truncate rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400" :title="enlacePaciente">
+              {{ enlacePaciente }}
+            </p>
+          </div>
+        </div>
+      </Card>
+
       <!-- ── Stats cards ─────────────────────────────────────────────────── -->
       <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <!-- Peso actual -->
@@ -110,6 +139,18 @@
         </div>
       </div>
 
+      <!-- Gráfico de línea: avance del paciente (peso en el tiempo) -->
+      <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-white/[0.02]">
+        <h3 class="mb-4 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+          <Icon icon="mdi:chart-line" class="h-5 w-5 text-blue-500" />
+          Avance del paciente
+        </h3>
+        <div v-if="tabla.length === 0" class="flex h-[280px] items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-800/50">
+          <p class="text-sm text-gray-500 dark:text-gray-400">Agrega registros de peso para ver el gráfico.</p>
+        </div>
+        <div v-else ref="chartRef" class="min-h-[280px] w-full" />
+      </div>
+
       <!-- ── IMC Reference Table ─────────────────────────────────────────── -->
       <div class="grid gap-4 lg:grid-cols-3">
         <!-- Tabla de referencia IMC -->
@@ -142,19 +183,10 @@
           </h3>
           <form @submit.prevent="submitRegistro" class="space-y-3">
             <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Fecha *</label>
-                <input v-model="formRegistro.fecha" type="date" required class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
-              </div>
-              <div>
-                <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Peso (kg) *</label>
-                <input v-model.number="formRegistro.peso" type="number" step="0.1" min="1" max="500" required class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" placeholder="Ej: 90.5" />
-              </div>
+              <FormInput v-model="formRegistro.fecha" type="date" label="Fecha *" required />
+              <FormInput v-model.number="formRegistro.peso" type="number" step="0.1" min="1" max="500" label="Peso (kg) *" placeholder="Ej: 90.5" required />
             </div>
-            <div>
-              <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Notas (opcional)</label>
-              <input v-model="formRegistro.notas" type="text" class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" placeholder="Ej: Medido en ayunas" maxlength="500" />
-            </div>
+            <FormInput v-model="formRegistro.notas" type="text" label="Notas (opcional)" placeholder="Ej: Medido en ayunas" :maxlength="500" />
 
             <!-- Preview IMC con el peso ingresado -->
             <div v-if="formRegistro.peso" class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-800 dark:bg-emerald-900/20">
@@ -284,22 +316,25 @@
               />
             </button>
             <div class="min-w-0 flex-1">
-              <input
+              <FormInput
                 v-model="r.descripcion"
                 type="text"
                 placeholder="Descripción de la recompensa..."
-                class="w-full bg-transparent text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none dark:text-white"
-                :class="r.done ? 'line-through opacity-60' : ''"
+                label-class="sr-only"
+                wrapper-class="mb-0"
+                :input-class="r.done ? 'line-through opacity-60 bg-transparent border-0 shadow-none' : ''"
               />
             </div>
             <div class="flex flex-shrink-0 items-center gap-1">
-              <input
+              <FormInput
                 v-model.number="r.kg_perdidos"
                 type="number"
                 step="0.5"
                 min="0"
-                class="w-16 rounded-lg border border-gray-300 bg-white px-2 py-1 text-center text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                size="sm"
                 placeholder="kg"
+                label-class="sr-only"
+                wrapper-class="!mb-0 w-20"
               />
               <span class="text-xs text-gray-400">kg</span>
             </div>
@@ -334,29 +369,14 @@
           </div>
           <form @submit.prevent="submitConfigurar" class="space-y-4 p-6">
             <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Peso inicial (kg) *</label>
-                <input v-model.number="formConfig.peso_inicial" type="number" step="0.1" min="1" max="500" required class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
-              </div>
-              <div>
-                <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Talla (cm) *</label>
-                <input v-model.number="formConfig.talla" type="number" step="0.1" min="50" max="300" required class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
-              </div>
+              <FormInput v-model.number="formConfig.peso_inicial" type="number" step="0.1" min="1" max="500" label="Peso inicial (kg) *" required />
+              <FormInput v-model.number="formConfig.talla" type="number" step="0.1" min="50" max="300" label="Talla (cm) *" required />
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Peso meta (kg)</label>
-                <input v-model.number="formConfig.peso_meta" type="number" step="0.1" min="1" max="500" class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
-              </div>
-              <div>
-                <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Fecha de inicio *</label>
-                <input v-model="formConfig.fecha_inicio" type="date" required class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
-              </div>
+              <FormInput v-model.number="formConfig.peso_meta" type="number" step="0.1" min="1" max="500" label="Peso meta (kg)" />
+              <FormInput v-model="formConfig.fecha_inicio" type="date" label="Fecha de inicio *" required />
             </div>
-            <div>
-              <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Fecha meta</label>
-              <input v-model="formConfig.fecha_meta" type="date" class="w-full rounded-xl border-2 border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
-            </div>
+            <FormInput v-model="formConfig.fecha_meta" type="date" label="Fecha meta" />
             <div class="flex gap-3 pt-2">
               <button type="button" @click="modalConfigura = false" class="flex-1 rounded-xl border border-gray-300 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300">
                 Cancelar
@@ -394,11 +414,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
+import ApexCharts from 'apexcharts';
+import axios from 'axios';
 import AppLayout from '@/Pages/Layouts/AppLayout.vue';
 import PageBreadcrumb from '@/components/PageBreadcrumb.vue';
 import { Alert, Card, Button, Badge } from '@/components/ui';
+import { FormInput } from '@/components/form';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -416,6 +439,90 @@ const flash = computed(() => page.props.flash ?? {});
 const tablaOrdenada = computed(() => [...props.tabla].reverse());
 const ultimoId      = computed(() => props.tabla[props.tabla.length - 1]?.id ?? null);
 
+// ── Gráfico de línea: avance del paciente ───────────────────────────────────
+const chartRef = ref(null);
+let chartInstance = null;
+
+function buildChartOptions() {
+  const tabla = props.tabla;
+  const categories = tabla.map((r) => String(r.semana));
+  const data = tabla.map((r) => Number(r.peso));
+  const minY = Math.min(...data, props.config.peso_inicial ?? 0);
+  const maxY = Math.max(...data, props.config.peso_inicial ?? 0);
+  const padding = 2;
+  return {
+    series: [{ name: 'Peso (kg)', data }],
+    chart: {
+      type: 'line',
+      height: 280,
+      fontFamily: 'inherit',
+      toolbar: { show: false },
+      zoom: { enabled: false },
+    },
+    colors: ['#2563eb'],
+    stroke: { curve: 'smooth', width: 2 },
+    markers: { size: 5, strokeWidth: 2, hover: { size: 6 } },
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories,
+      title: { text: 'Registro' },
+      axisBorder: { show: true },
+      axisTicks: { show: true },
+      labels: { style: { fontSize: '12px' } },
+    },
+    yaxis: {
+      title: { text: 'Peso (kg)' },
+      min: Math.floor(minY - padding),
+      max: Math.ceil(maxY + padding),
+      tickAmount: 6,
+      labels: { style: { fontSize: '12px' } },
+    },
+    grid: {
+      borderColor: '#e5e7eb',
+      strokeDashArray: 4,
+      xaxis: { lines: { show: true } },
+      yaxis: { lines: { show: true } },
+    },
+    tooltip: {
+      y: { formatter: (val) => `${val} kg` },
+    },
+  };
+}
+
+function initOrUpdateChart() {
+  if (props.tabla.length === 0) return;
+  if (!chartRef.value) return;
+  const options = buildChartOptions();
+  if (chartInstance) {
+    chartInstance.updateOptions({
+      series: options.series,
+      xaxis: options.xaxis,
+      yaxis: options.yaxis,
+    });
+  } else {
+    chartInstance = new ApexCharts(chartRef.value, options);
+    chartInstance.render();
+  }
+}
+
+onMounted(() => {
+  initOrUpdateChart();
+});
+onBeforeUnmount(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
+});
+watch(() => props.tabla, () => {
+  if (props.tabla.length === 0 && chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+    return;
+  }
+  initOrUpdateChart();
+}, { deep: true });
+
 // ── Formulario de registro ────────────────────────────────────────────────────
 const formRegistro = ref({
   config_id: props.config.id,
@@ -424,6 +531,32 @@ const formRegistro = ref({
   notas:     '',
 });
 const submitting = ref(false);
+
+// Enlace público para el paciente (sin usuario/contraseña)
+const enlacePaciente = ref('');
+const loadingEnlace = ref(false);
+
+async function obtenerEnlacePaciente() {
+  if (enlacePaciente.value) {
+    try {
+      await navigator.clipboard.writeText(enlacePaciente.value);
+      // Opcional: mostrar toast "Copiado"
+    } catch (_) {
+      // Fallback: seleccionar input si lo hubiera
+    }
+    return;
+  }
+  loadingEnlace.value = true;
+  try {
+    const { data } = await axios.post('/control-peso/generar-enlace', { config_id: props.config.id });
+    enlacePaciente.value = data.url;
+    await navigator.clipboard.writeText(data.url);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loadingEnlace.value = false;
+  }
+}
 
 function submitRegistro() {
   submitting.value = true;
