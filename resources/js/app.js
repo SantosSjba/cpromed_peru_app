@@ -1,56 +1,25 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
-import ApexCharts from 'apexcharts';
+import { createInertiaApp } from '@inertiajs/vue3';
+import { createApp, h } from 'vue';
 
-// flatpickr
-import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.min.css';
-// FullCalendar
-import { Calendar } from '@fullcalendar/core';
+const appName = import.meta.env.VITE_APP_NAME || 'CPROMED PERU';
 
-
-
-window.Alpine = Alpine;
-window.ApexCharts = ApexCharts;
-window.flatpickr = flatpickr;
-window.FullCalendar = Calendar;
-
-Alpine.start();
-
-// Initialize components on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Map imports
-    if (document.querySelector('#mapOne')) {
-        import('./components/map').then(module => module.initMap());
-    }
-
-    // Chart imports
-    if (document.querySelector('#chartOne')) {
-        import('./components/chart/chart-1').then(module => module.initChartOne());
-    }
-    if (document.querySelector('#chartTwo')) {
-        import('./components/chart/chart-2').then(module => module.initChartTwo());
-    }
-    if (document.querySelector('#chartThree')) {
-        import('./components/chart/chart-3').then(module => module.initChartThree());
-    }
-    if (document.querySelector('#chartSix')) {
-        import('./components/chart/chart-6').then(module => module.initChartSix());
-    }
-    if (document.querySelector('#chartEight')) {
-        import('./components/chart/chart-8').then(module => module.initChartEight());
-    }
-    if (document.querySelector('#chartThirteen')) {
-        import('./components/chart/chart-13').then(module => module.initChartThirteen());
-    }
-
-    // Calendar init
-    if (document.querySelector('#calendar')) {
-        import('./components/calendar-init').then(module => module.calendarInit());
-    }
-
-    // XLSX for consulta de precios export
-    if (document.querySelector('[data-module="consulta-precios"]')) {
-        import('xlsx').then(mod => { window.XLSX = mod; });
-    }
+createInertiaApp({
+    title: (title) => (title ? `${title} | ${appName}` : appName),
+    resolve: (name) => {
+        const pages = import.meta.glob('./Pages/**/*.vue');
+        const path = `./Pages/${name}.vue`;
+        const page = pages[path];
+        if (!page) return Promise.reject(new Error(`Página no encontrada: ${name}`));
+        return page().then((m) => m.default);
+    },
+    setup({ el, App, props, plugin }) {
+        return createApp({ render: () => h(App, props) })
+            .use(plugin)
+            .mount(el);
+    },
+    progress: {
+        color: '#4B5563',
+        showSpinner: true,
+    },
 });

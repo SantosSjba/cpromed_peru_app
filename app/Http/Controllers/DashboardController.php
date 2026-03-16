@@ -3,19 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Http;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
     /**
-     * Dashboard con noticias de salud/medicina.
+     * Dashboard con noticias de salud/medicina (Vue + Inertia).
      * Orden: 1) GNews (servidor), 2) NewsAPI (localhost), 3) RSS público (sin clave).
      */
-    public function index(): View
+    public function index(): Response
     {
         $articles = $this->fetchMedicalNews();
 
-        return view('pages.dashboard.medical-news', [
+        return Inertia::render('Dashboard', [
             'title' => 'Dashboard',
             'articles' => $articles,
         ]);

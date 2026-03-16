@@ -9,19 +9,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AuthController extends Controller
 {
     /**
      * Mostrar formulario de login.
      */
-    public function showLoginForm(): View|RedirectResponse
+    public function showLoginForm(): Response|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        return view('pages.auth.signin', ['title' => 'Iniciar sesión']);
+        return Inertia::render('Auth/Signin', [
+            'title' => 'Iniciar sesión',
+            'status' => session('error'),
+        ]);
     }
 
     /**
@@ -51,12 +55,12 @@ class AuthController extends Controller
     /**
      * Mostrar formulario de registro.
      */
-    public function showRegisterForm(): View|RedirectResponse
+    public function showRegisterForm(): Response|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        return view('pages.auth.signup', ['title' => 'Registrarse']);
+        return Inertia::render('Auth/Signup', ['title' => 'Registrarse']);
     }
 
     /**

@@ -83,14 +83,11 @@ Route::post('eliminar-examen',              [HistoriaClinicaController::class, '
 Route::middleware('auth')->group(function () {
     Route::get('/', fn () => redirect()->route('dashboard'));
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/ecommerce', fn () => \Inertia\Inertia::render('Ecommerce', ['title' => 'Ecommerce']))->name('ecommerce');
 
-    Route::get('/calendar', function () {
-        return view('pages.calender', ['title' => 'Calendario']);
-    })->name('calendar');
+    Route::get('/calendar', fn () => \Inertia\Inertia::render('Calendar', ['title' => 'Calendario']))->name('calendar');
 
-    Route::get('/profile', function () {
-        return view('pages.profile', ['title' => 'Perfil']);
-    })->name('profile');
+    Route::get('/profile', fn () => \Inertia\Inertia::render('Profile', ['title' => 'Perfil']))->name('profile');
 
     // Notas de venta (migrado desde admintopico)
     Route::get('notas-venta/cliente-por-dni', [NotaVentaController::class, 'clientePorDni'])->name('notas-venta.cliente-por-dni');
@@ -98,53 +95,31 @@ Route::middleware('auth')->group(function () {
     Route::get('notas-venta/{notaVenta}/pdf', [NotaVentaController::class, 'pdf'])->name('notas-venta.pdf.slug');
     Route::resource('notas-venta', NotaVentaController::class)->only(['index', 'create', 'store', 'show', 'destroy'])->parameters(['notas-venta' => 'notaVenta']);
 
-    Route::get('/form-elements', function () {
-        return view('pages.form.form-elements', ['title' => 'Form Elements']);
-    })->name('form-elements');
+    Route::get('/form-elements', fn () => \Inertia\Inertia::render('FormElements', ['title' => 'Form Elements']))->name('form-elements');
 
-    Route::get('/basic-tables', function () {
-        return view('pages.tables.basic-tables', ['title' => 'Basic Tables']);
-    })->name('basic-tables');
+    Route::get('/basic-tables', fn () => \Inertia\Inertia::render('BasicTables', ['title' => 'Basic Tables']))->name('basic-tables');
 
     Route::get('/blank', function () {
-        return view('pages.blank', ['title' => 'Blank']);
+        return \Inertia\Inertia::render('Blank', ['title' => 'Blank']);
     })->name('blank');
 
-    Route::get('/error-404', function () {
-        return view('pages.errors.error-404', ['title' => 'Error 404']);
-    })->name('error-404');
+    Route::get('/error-404', fn () => \Inertia\Inertia::render('Error404', ['title' => 'Error 404']))->name('error-404');
 
-    Route::get('/line-chart', function () {
-        return view('pages.chart.line-chart', ['title' => 'Line Chart']);
-    })->name('line-chart');
+    Route::get('/line-chart', fn () => \Inertia\Inertia::render('LineChart', ['title' => 'Line Chart']))->name('line-chart');
 
-    Route::get('/bar-chart', function () {
-        return view('pages.chart.bar-chart', ['title' => 'Bar Chart']);
-    })->name('bar-chart');
+    Route::get('/bar-chart', fn () => \Inertia\Inertia::render('BarChart', ['title' => 'Bar Chart']))->name('bar-chart');
 
-    Route::get('/alerts', function () {
-        return view('pages.ui-elements.alerts', ['title' => 'Alerts']);
-    })->name('alerts');
+    Route::get('/alerts', fn () => \Inertia\Inertia::render('Alerts', ['title' => 'Alerts']))->name('alerts');
 
-    Route::get('/avatars', function () {
-        return view('pages.ui-elements.avatars', ['title' => 'Avatars']);
-    })->name('avatars');
+    Route::get('/avatars', fn () => \Inertia\Inertia::render('Avatars', ['title' => 'Avatars']))->name('avatars');
 
-    Route::get('/badge', function () {
-        return view('pages.ui-elements.badges', ['title' => 'Badges']);
-    })->name('badges');
+    Route::get('/badge', fn () => \Inertia\Inertia::render('Badges', ['title' => 'Badges']))->name('badges');
 
-    Route::get('/buttons', function () {
-        return view('pages.ui-elements.buttons', ['title' => 'Buttons']);
-    })->name('buttons');
+    Route::get('/buttons', fn () => \Inertia\Inertia::render('Buttons', ['title' => 'Buttons']))->name('buttons');
 
-    Route::get('/image', function () {
-        return view('pages.ui-elements.images', ['title' => 'Images']);
-    })->name('images');
+    Route::get('/image', fn () => \Inertia\Inertia::render('Images', ['title' => 'Images']))->name('images');
 
-    Route::get('/videos', function () {
-        return view('pages.ui-elements.videos', ['title' => 'Videos']);
-    })->name('videos');
+    Route::get('/videos', fn () => \Inertia\Inertia::render('Videos', ['title' => 'Videos']))->name('videos');
 
     // Historia clínica: solo rutas sin segmentos dinámicos (index, crear, guardar)
     // Las demás están fuera del grupo auth con query string para compatibilidad con cPanel
@@ -160,18 +135,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/consulta-precios/buscar', [ConsultaPreciosController::class, 'buscar'])->name('consulta-precios.buscar');
     Route::post('/consulta-precios/detalle', [ConsultaPreciosController::class, 'detalle'])->name('consulta-precios.detalle');
 
-    // Cepromed: módulos de negocio (placeholders)
-    Route::get('/pacientes', fn () => view('pages.blank', ['title' => 'Pacientes']))->name('pacientes.index');
-    Route::get('/pacientes/crear', fn () => view('pages.blank', ['title' => 'Agregar Paciente']))->name('pacientes.crear');
-    Route::get('/pacientes/registro', fn () => view('pages.blank', ['title' => 'Registro de Pacientes']))->name('pacientes.registro');
-    Route::get('/citas/crear', fn () => view('pages.blank', ['title' => 'Reservar Cita']))->name('citas.crear');
-    Route::get('/medicos', fn () => view('pages.blank', ['title' => 'Médicos']))->name('medicos.index');
-    Route::get('/medicos/crear', fn () => view('pages.blank', ['title' => 'Agregar Médico']))->name('medicos.crear');
-    Route::get('/medicos/turnos', fn () => view('pages.blank', ['title' => 'Gestión de Turnos']))->name('medicos.turnos');
-    Route::get('/registros/nacimiento', fn () => view('pages.blank', ['title' => 'Registro de Nacimiento']))->name('registros.nacimiento');
-    Route::get('/registros/defuncion', fn () => view('pages.blank', ['title' => 'Registro de Defunción']))->name('registros.defuncion');
-    Route::get('/farmacia', fn () => view('pages.blank', ['title' => 'Farmacia']))->name('farmacia.index');
-    Route::get('/farmacia/crear', fn () => view('pages.blank', ['title' => 'Agregar Medicamento']))->name('farmacia.crear');
-    Route::get('/inventario', fn () => view('pages.blank', ['title' => 'Inventario']))->name('inventario.index');
-    Route::get('/inventario/emitidos', fn () => view('pages.blank', ['title' => 'Artículos Emitidos']))->name('inventario.emitidos');
+    // Cepromed: módulos de negocio (placeholders - Vue Blank)
+    Route::get('/pacientes', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Pacientes']))->name('pacientes.index');
+    Route::get('/pacientes/crear', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Agregar Paciente']))->name('pacientes.crear');
+    Route::get('/pacientes/registro', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Registro de Pacientes']))->name('pacientes.registro');
+    Route::get('/citas/crear', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Reservar Cita']))->name('citas.crear');
+    Route::get('/medicos', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Médicos']))->name('medicos.index');
+    Route::get('/medicos/crear', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Agregar Médico']))->name('medicos.crear');
+    Route::get('/medicos/turnos', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Gestión de Turnos']))->name('medicos.turnos');
+    Route::get('/registros/nacimiento', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Registro de Nacimiento']))->name('registros.nacimiento');
+    Route::get('/registros/defuncion', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Registro de Defunción']))->name('registros.defuncion');
+    Route::get('/farmacia', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Farmacia']))->name('farmacia.index');
+    Route::get('/farmacia/crear', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Agregar Medicamento']))->name('farmacia.crear');
+    Route::get('/inventario', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Inventario']))->name('inventario.index');
+    Route::get('/inventario/emitidos', fn () => \Inertia\Inertia::render('Blank', ['title' => 'Artículos Emitidos']))->name('inventario.emitidos');
 });

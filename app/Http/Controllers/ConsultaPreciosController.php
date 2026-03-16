@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\JsonResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ConsultaPreciosController extends Controller
 {
@@ -50,11 +52,11 @@ class ConsultaPreciosController extends Controller
         ];
     }
 
-    public function index(): \Illuminate\View\View
+    public function index(): Response
     {
         $departamentos = self::DEPARTAMENTOS;
 
-        return view('pages.consulta-precios.index', [
+        return Inertia::render('ConsultaPrecios/Index', [
             'title'         => 'Consulta de Precios de Medicamentos',
             'departamentos' => $departamentos,
         ]);

@@ -8,15 +8,15 @@ use App\Models\HistoriaClinicaConsulta;
 use App\Models\PacienteExamen;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\Response;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class HistoriaClinicaController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request): Response|RedirectResponse
     {
         if (! Auth::check()) {
             return redirect()->route('signin')->with('error', 'Inicia sesión para acceder.');
@@ -28,11 +28,11 @@ class HistoriaClinicaController extends Controller
             $query = Paciente::where('user_id', Auth::id())->with('historiaClinicaFicha');
 
             if ($buscar !== '') {
-                $term = '%' . $buscar . '%';
+                $term = '%' . mb_strtolower($buscar) . '%';
                 $query->where(function ($q) use ($term) {
-                    $q->where('nombres', 'like', $term)
-                        ->orWhere('apellidos', 'like', $term)
-                        ->orWhere('dni', 'like', $term);
+                    $q->whereRaw('LOWER(nombres) LIKE ?', [$term])
+                        ->orWhereRaw('LOWER(apellidos) LIKE ?', [$term])
+                        ->orWhereRaw('LOWER(dni) LIKE ?', [$term]);
                 });
             }
 
@@ -42,16 +42,16 @@ class HistoriaClinicaController extends Controller
             return redirect()->route('dashboard')->with('error', 'Error al cargar historia clínica. Revisa los logs.');
         }
 
-        return view('pages.historia-clinica.index', [
+        return Inertia::render('HistoriaClinica/Index', [
             'title' => 'Historia clínica',
             'pacientes' => $pacientes,
             'buscar' => $buscar,
         ]);
     }
 
-    public function create(): View
+    public function create(): Response
     {
-        return view('pages.historia-clinica.create', ['title' => 'Nueva historia clínica']);
+        return Inertia::render('HistoriaClinica/Create', ['title' => 'Nueva historia clínica']);
     }
 
     public function store(Request $request): RedirectResponse
@@ -132,7 +132,7 @@ class HistoriaClinicaController extends Controller
             ->with('success', 'Historia clínica registrada correctamente.');
     }
 
-    public function show(Paciente $paciente): View|RedirectResponse
+    public function show(Paciente $paciente): Response|RedirectResponse
     {
         if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
@@ -156,17 +156,17 @@ class HistoriaClinicaController extends Controller
             })
             ->sortByDesc(fn ($g) => $g['fecha']);
 
-        return view('pages.historia-clinica.show', [
+        return Inertia::render('HistoriaClinica/Show', [
             'title' => 'Historia clínica - ' . $paciente->nombre_completo,
             'paciente' => $paciente,
-            'examenesPorFecha' => $examenesPorFecha,
+            'examenesPorFecha' => $examenesPorFecha->values()->all(),
         ]);
     }
 
     /**
      * Ver ficha del paciente por query string (?id=1). Evita 404 en cPanel con URLs /historia-clinica/1.
      */
-    public function showByQuery(Request $request): View|RedirectResponse
+    public function showByQuery(Request $request): Response|RedirectResponse
     {
         if (! Auth::check()) {
             return redirect()->route('signin')
@@ -191,7 +191,7 @@ class HistoriaClinicaController extends Controller
     /**
      * PDF de historia clínica por query string (?id=1). Evita 404 en cPanel.
      */
-    public function pdfByQuery(Request $request): Response|RedirectResponse
+    public function pdfByQuery(Request $request): \Symfony\Component\HttpFoundation\Response|RedirectResponse
     {
         if (! Auth::check()) {
             return redirect()->route('signin')
@@ -213,13 +213,13 @@ class HistoriaClinicaController extends Controller
         return $this->pdfHistoriaClinica($paciente);
     }
 
-    public function edit(Paciente $paciente): View|RedirectResponse
+    public function edit(Paciente $paciente): Response|RedirectResponse
     {
         if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
         $paciente->load('historiaClinicaFicha');
-        return view('pages.historia-clinica.edit', [
+        return Inertia::render('HistoriaClinica/Edit', [
             'title' => 'Editar historia clínica - ' . $paciente->nombre_completo,
             'paciente' => $paciente,
         ]);
@@ -297,12 +297,12 @@ class HistoriaClinicaController extends Controller
             ->with('success', 'Historia clínica actualizada correctamente.');
     }
 
-    public function createConsulta(Paciente $paciente): View|RedirectResponse
+    public function createConsulta(Paciente $paciente): Response|RedirectResponse
     {
         if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);
         }
-        return view('pages.historia-clinica.consulta-create', [
+        return Inertia::render('HistoriaClinica/ConsultaCreate', [
             'title' => 'Nueva consulta - ' . $paciente->nombre_completo,
             'paciente' => $paciente,
         ]);
@@ -340,24 +340,24 @@ class HistoriaClinicaController extends Controller
             ->with('success', 'Consulta registrada correctamente.');
     }
 
-    public function showConsulta(Paciente $paciente, HistoriaClinicaConsulta $consulta): View|RedirectResponse
+    public function showConsulta(Paciente $paciente, HistoriaClinicaConsulta $consulta): Response|RedirectResponse
     {
         if ((int) $paciente->user_id !== (int) Auth::id() || (int) $consulta->paciente_id !== (int) $paciente->id) {
             abort(404);
         }
-        return view('pages.historia-clinica.consulta-show', [
+        return Inertia::render('HistoriaClinica/ConsultaShow', [
             'title' => 'Consulta - ' . $paciente->nombre_completo,
             'paciente' => $paciente,
             'consulta' => $consulta,
         ]);
     }
 
-    public function editConsulta(Paciente $paciente, HistoriaClinicaConsulta $consulta): View|RedirectResponse
+    public function editConsulta(Paciente $paciente, HistoriaClinicaConsulta $consulta): Response|RedirectResponse
     {
         if ((int) $paciente->user_id !== (int) Auth::id() || (int) $consulta->paciente_id !== (int) $paciente->id) {
             abort(404);
         }
-        return view('pages.historia-clinica.consulta-edit', [
+        return Inertia::render('HistoriaClinica/ConsultaEdit', [
             'title' => 'Editar consulta - ' . $paciente->nombre_completo,
             'paciente' => $paciente,
             'consulta' => $consulta,
@@ -583,7 +583,7 @@ class HistoriaClinicaController extends Controller
         return null;
     }
 
-    public function editByQuery(Request $request): View|RedirectResponse
+    public function editByQuery(Request $request): Response|RedirectResponse
     {
         if ($r = $this->authGuard()) return $r;
         $paciente = $this->resolverPaciente((int) $request->query('id', 0));
@@ -599,7 +599,7 @@ class HistoriaClinicaController extends Controller
         return $this->update($request, $paciente);
     }
 
-    public function createConsultaByQuery(Request $request): View|RedirectResponse
+    public function createConsultaByQuery(Request $request): Response|RedirectResponse
     {
         if ($r = $this->authGuard()) return $r;
         $paciente = $this->resolverPaciente((int) $request->query('paciente', 0));
@@ -615,7 +615,7 @@ class HistoriaClinicaController extends Controller
         return $this->storeConsulta($request, $paciente);
     }
 
-    public function showConsultaByQuery(Request $request): View|RedirectResponse
+    public function showConsultaByQuery(Request $request): Response|RedirectResponse
     {
         if ($r = $this->authGuard()) return $r;
         $paciente = $this->resolverPaciente((int) $request->query('paciente', 0));
@@ -629,7 +629,7 @@ class HistoriaClinicaController extends Controller
         return $this->showConsulta($paciente, $consulta);
     }
 
-    public function editConsultaByQuery(Request $request): View|RedirectResponse
+    public function editConsultaByQuery(Request $request): Response|RedirectResponse
     {
         if ($r = $this->authGuard()) return $r;
         $paciente = $this->resolverPaciente((int) $request->query('paciente', 0));
@@ -715,7 +715,7 @@ class HistoriaClinicaController extends Controller
     /**
      * Genera PDF de la historia clínica del paciente (datos personales, ficha, consultas). No incluye exámenes.
      */
-    public function pdfHistoriaClinica(Paciente $paciente): Response
+    public function pdfHistoriaClinica(Paciente $paciente): \Symfony\Component\HttpFoundation\Response
     {
         if ((int) $paciente->user_id !== (int) Auth::id()) {
             abort(404);

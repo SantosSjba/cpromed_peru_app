@@ -5,45 +5,45 @@ namespace App\Http\Controllers;
 use App\Models\NotaVenta;
 use App\Models\Paciente;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Inertia\Response;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Symfony\Component\HttpFoundation\Response;
 
 class NotaVentaController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): Response
     {
         $buscar = $request->query('buscar', '');
         $query = NotaVenta::where('user_id', Auth::id());
 
         if (trim($buscar) !== '') {
-            $term = '%' . trim($buscar) . '%';
+            $term = '%' . mb_strtolower(trim($buscar)) . '%';
             $query->where(function ($q) use ($term) {
-                $q->where('numero_documento', 'like', $term)
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(cliente, '$.nombre')) LIKE ?", [$term])
-                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(cliente, '$.dni_ruc')) LIKE ?", [$term]);
+                $q->whereRaw('LOWER(numero_documento) LIKE ?', [$term])
+                    ->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(cliente, '$.nombre'))) LIKE ?", [$term])
+                    ->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(cliente, '$.dni_ruc'))) LIKE ?", [$term]);
             });
         }
 
         $notas = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
 
-        return view('pages.notas-venta.index', [
+        return Inertia::render('NotasVenta/Index', [
             'title' => 'Notas de venta',
             'notas' => $notas,
             'buscar' => $buscar,
         ]);
     }
 
-    public function create(): View
+    public function create(): Response
     {
         $clienteInit = [
             'clienteNombre' => old('cliente_nombre', ''),
             'clienteDniRuc' => old('cliente_dni_ruc', ''),
             'clienteDireccion' => old('cliente_direccion', ''),
         ];
-        return view('pages.notas-venta.create', [
+        return Inertia::render('NotasVenta/Create', [
             'title' => 'Nueva nota de venta',
             'clienteInit' => $clienteInit,
         ]);
@@ -179,7 +179,7 @@ class NotaVentaController extends Controller
      * Ver nota por query string (?id=2). Ruta fuera del middleware auth para evitar
      * que en cPanel la sesión no se reconozca en URLs con segmento (/notas-venta/2).
      */
-    public function showByQuery(Request $request): View|RedirectResponse
+    public function showByQuery(Request $request): Response|RedirectResponse
     {
         if (! Auth::check()) {
             return redirect()->route('signin')
@@ -198,19 +198,19 @@ class NotaVentaController extends Controller
                 ->with('error', 'No se encontró esa nota de venta.');
         }
 
-        return view('pages.notas-venta.show', [
+        return Inertia::render('NotasVenta/Show', [
             'title' => 'Nota de venta ' . $notaVenta->numero_documento,
             'nota' => $notaVenta,
         ]);
     }
 
-    public function show(NotaVenta $notaVenta): View|RedirectResponse
+    public function show(NotaVenta $notaVenta): Response|RedirectResponse
     {
         if ($notaVenta->user_id !== Auth::id()) {
             abort(404);
         }
 
-        return view('pages.notas-venta.show', [
+        return Inertia::render('NotasVenta/Show', [
             'title' => 'Nota de venta ' . $notaVenta->numero_documento,
             'nota' => $notaVenta,
         ]);
@@ -261,7 +261,7 @@ class NotaVentaController extends Controller
      * PDF por query string (?id=2). Ruta fuera del middleware auth para evitar 404 en cPanel.
      * La autenticación y validación se hacen aquí.
      */
-    public function pdfByQuery(Request $request): Response|RedirectResponse
+    public function pdfByQuery(Request $request): \Symfony\Component\HttpFoundation\Response|RedirectResponse
     {
         if (! Auth::check()) {
             return redirect()->route('signin')
@@ -296,13 +296,13 @@ class NotaVentaController extends Controller
     /**
      * PDF por ID en la ruta (notas-venta/pdf/{id}).
      */
-    public function pdfById(int $id): Response
+    public function pdfById(int $id): \Symfony\Component\HttpFoundation\Response
     {
         $notaVenta = NotaVenta::findOrFail($id);
         return $this->pdf($notaVenta);
     }
 
-    public function pdf(NotaVenta $notaVenta): Response
+    public function pdf(NotaVenta $notaVenta): \Symfony\Component\HttpFoundation\Response
     {
 
         $data = $this->prepareDataForPdf($notaVenta);
